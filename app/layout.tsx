@@ -2,7 +2,6 @@ import type { Metadata } from "next";
 import { Geist, Geist_Mono } from "next/font/google";
 import "./globals.css";
 import NavbarWrapper from "../components/NavbarWrapper";
-import Footer from "../components/Footer";
 import { generateOrganizationJsonLd } from "../lib/seo";
 import AnalyticsTracker from "../components/AnalyticsTracker";
 
@@ -70,7 +69,6 @@ export default function RootLayout({
         <AnalyticsTracker />
         <NavbarWrapper />
         {children}
-        <Footer />
       </body>
     </html>
   );

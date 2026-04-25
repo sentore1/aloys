@@ -52,9 +52,38 @@ export default function Footer() {
   }
 
   return (
-    <footer className={`py-6 ${settings.footer_show_border ? 'border-t' : ''}`}>
+    <footer className={`py-12 ${settings.footer_show_border ? 'border-t' : ''}`}>
       <div className="max-w-7xl mx-auto px-4">
-        <div className="flex flex-col items-center justify-center text-center">
+        <div className="grid grid-cols-1 md:grid-cols-4 gap-8 mb-8">
+          <div>
+            <h3 className="font-bold mb-4">I tech Devices</h3>
+            <p className="text-sm text-gray-600">Leading provider of IT, Security and Identification solutions.</p>
+          </div>
+          <div>
+            <h4 className="font-bold mb-4">Our Products</h4>
+            <ul className="space-y-2 text-sm text-gray-600">
+              <li><a href="/servers" className="hover:text-gray-900">Servers</a></li>
+              <li><a href="/id-card-printers" className="hover:text-gray-900">ID Card Printers</a></li>
+              <li><a href="/access-control" className="hover:text-gray-900">Access Control</a></li>
+              <li><a href="/biometric-devices" className="hover:text-gray-900">Biometric Devices</a></li>
+            </ul>
+          </div>
+          <div>
+            <h4 className="font-bold mb-4">Quick Links</h4>
+            <ul className="space-y-2 text-sm text-gray-600">
+              <li><a href="/products" className="hover:text-gray-900">All Products</a></li>
+              <li><a href="/cart" className="hover:text-gray-900">Shopping Cart</a></li>
+              <li><a href="/account" className="hover:text-gray-900">My Account</a></li>
+            </ul>
+          </div>
+          <div>
+            <h4 className="font-bold mb-4">Help & Support</h4>
+            <ul className="space-y-2 text-sm text-gray-600">
+              <li><a href="/support" className="hover:text-gray-900">Support Center</a></li>
+            </ul>
+          </div>
+        </div>
+        <div className="flex flex-col items-center justify-center text-center border-t pt-6">
           {settings.footer_show_logo && settings.site_logo ? (
             <img 
               src={settings.site_logo} 

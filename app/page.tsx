@@ -3,6 +3,15 @@
 import { useState, useEffect } from 'react'
 import { Search, ShoppingCart, User, Menu, X } from 'lucide-react'
 import Navbar from '../components/Navbar'
+import CategorySection from '../components/CategorySection'
+import FeatureCards from '../components/FeatureCards'
+import BrandsSection from '../components/BrandsSection'
+import PartnershipsSection from '../components/PartnershipsSection'
+import FeaturesSection from '../components/FeaturesSection'
+import SolutionsSection from '../components/SolutionsSection'
+import ContentCardsSection from '../components/ContentCardsSection'
+import FeaturedCardSection from '../components/FeaturedCardSection'
+import ImprovedFooter from '../components/ImprovedFooter'
 import { supabase } from '../lib/supabase'
 import { formatPrice, formatPriceShort } from '../lib/currency'
 
@@ -71,7 +80,15 @@ function SliderHero({ section }: { section: any }) {
   return (
     <section className="relative bg-gray-100 overflow-hidden" style={{ height: `${section.hero_height}px`, borderRadius: `${section.hero_border_radius}px` }}>
       {images.map((url: string, i: number) => (
-        <div key={i} className="absolute inset-0 w-full h-full bg-cover bg-center transition-opacity duration-700" style={{ backgroundImage: `url(${url})`, opacity: i === current ? 1 : 0 }} />
+        <div 
+          key={i} 
+          className="absolute inset-0 w-full h-full bg-cover bg-center transition-all duration-1000 ease-in-out" 
+          style={{ 
+            backgroundImage: `url(${url})`, 
+            opacity: i === current ? 1 : 0,
+            transform: i === current ? 'scale(1)' : 'scale(1.1)'
+          }} 
+        />
       ))}
       {section.hero_overlay_enabled && <div className="absolute inset-0" style={{ backgroundColor: section.hero_overlay_color, opacity: section.hero_overlay_opacity }} />}
       <div className="relative z-10 h-full flex flex-col items-center justify-center text-center text-white px-4">
@@ -82,7 +99,7 @@ function SliderHero({ section }: { section: any }) {
       {images.length > 1 && (
         <div className="absolute bottom-4 left-0 right-0 flex justify-center gap-2 z-20">
           {images.map((_: string, i: number) => (
-            <button key={i} onClick={() => setCurrent(i)} className={`w-2 h-2 rounded-full transition-colors ${i === current ? 'bg-white' : 'bg-white/40'}`} />
+            <button key={i} onClick={() => setCurrent(i)} className={`w-2 h-2 rounded-full transition-all duration-300 ${i === current ? 'bg-white w-8' : 'bg-white/40'}`} />
           ))}
         </div>
       )}
@@ -166,6 +183,15 @@ export default function Home() {
   const [cartCount, setCartCount] = useState(0)
   const [categories, setCategories] = useState<string[]>(['All', 'Tops', 'Bottoms', 'Dresses', 'Accessories'])
   const [heroSections, setHeroSections] = useState<any[]>([])
+  const [categoryIcons, setCategoryIcons] = useState<any[]>([])
+  const [featureCards, setFeatureCards] = useState<any[]>([])
+  const [brands, setBrands] = useState<any[]>([])
+  const [partnerships, setPartnerships] = useState<any[]>([])
+  const [features, setFeatures] = useState<any[]>([])
+  const [solutions, setSolutions] = useState<any[]>([])
+  const [contentCards, setContentCards] = useState<any[]>([])
+  const [footerLocations, setFooterLocations] = useState<any[]>([])
+  const [featuredCard, setFeaturedCard] = useState<any>(null)
 
   useEffect(() => {
     fetchProducts()
@@ -173,6 +199,15 @@ export default function Home() {
     updateCartCount()
     fetchCategories()
     fetchHeroSections()
+    fetchCategoryIcons()
+    fetchFeatureCards()
+    fetchBrands()
+    fetchPartnerships()
+    fetchFeatures()
+    fetchSolutions()
+    fetchContentCards()
+    fetchFooterLocations()
+    fetchFeaturedCard()
   }, [])
 
   const fetchCategories = async () => {
@@ -193,6 +228,93 @@ export default function Home() {
       if (data && !error) setHeroSections(data)
     } catch (error) {
       console.log('No hero sections found')
+    }
+  }
+
+  const fetchCategoryIcons = async () => {
+    try {
+      const { data, error } = await supabase.from('categories_with_icons').select('*').eq('enabled', true).order('position')
+      if (data && !error) setCategoryIcons(data)
+    } catch (error) {
+      console.log('No category icons found')
+    }
+  }
+
+  const fetchFeatureCards = async () => {
+    try {
+      const { data, error } = await supabase.from('feature_cards').select('*').eq('enabled', true).order('position')
+      if (data && !error) setFeatureCards(data)
+    } catch (error) {
+      console.log('No feature cards found')
+    }
+  }
+
+  const fetchBrands = async () => {
+    try {
+      const { data, error } = await supabase.from('brands').select('*').eq('enabled', true).order('position')
+      if (data && !error) setBrands(data)
+    } catch (error) {
+      console.log('No brands found')
+    }
+  }
+
+  const fetchPartnerships = async () => {
+    try {
+      const { data, error } = await supabase.from('partnerships').select('*').eq('enabled', true).order('position')
+      if (data && !error) setPartnerships(data)
+    } catch (error) {
+      console.log('No partnerships found')
+    }
+  }
+
+  const fetchFeatures = async () => {
+    try {
+      const { data, error } = await supabase.from('features').select('*').eq('enabled', true).order('position')
+      if (data && !error) setFeatures(data)
+    } catch (error) {
+      console.log('No features found')
+    }
+  }
+
+  const fetchSolutions = async () => {
+    try {
+      const { data, error } = await supabase.from('solutions').select('*').eq('enabled', true).order('position')
+      if (data && !error) setSolutions(data)
+    } catch (error) {
+      console.log('No solutions found')
+    }
+  }
+
+  const fetchContentCards = async () => {
+    try {
+      const { data, error } = await supabase.from('content_cards').select('*').eq('enabled', true).order('position')
+      if (data && !error) setContentCards(data)
+    } catch (error) {
+      console.log('No content cards found')
+    }
+  }
+
+  const fetchFooterLocations = async () => {
+    try {
+      const { data, error } = await supabase.from('footer_locations').select('*').eq('enabled', true).order('position')
+      if (data && !error) setFooterLocations(data)
+    } catch (error) {
+      console.log('No footer locations found')
+    }
+  }
+
+  const fetchFeaturedCard = async () => {
+    try {
+      const { data, error } = await supabase.from('featured_cards').select('*').eq('enabled', true).order('position').limit(1).single()
+      console.log('Featured card fetch result:', { data, error })
+      if (data && !error) {
+        console.log('Setting featured card:', data)
+        setFeaturedCard(data)
+      } else if (error) {
+        console.error('Featured card error:', error)
+      }
+    } catch (error) {
+      console.error('Featured card exception:', error)
     }
   }
 
@@ -258,6 +380,20 @@ export default function Home() {
       ))}
       
       <main className="max-w-7xl mx-auto px-4 py-8">
+        {categoryIcons.length > 0 && <CategorySection categories={categoryIcons} />}
+        
+        {featureCards.length > 0 && <FeatureCards cards={featureCards} />}
+        
+        {features.length > 0 && <FeaturesSection features={features} />}
+        
+        {solutions.length > 0 && <SolutionsSection solutions={solutions} />}
+        
+        {contentCards.length > 0 && <ContentCardsSection cards={contentCards} />}
+        
+        {brands.length > 0 && <BrandsSection brands={brands} />}
+        
+        {partnerships.length > 0 && <PartnershipsSection partnerships={partnerships} />}
+        
         {heroSections.filter((s: any) => s.enabled && s.vertical_position === 'middle').map((section: any) => (
           <div key={section.id} className="mb-8"><HeroSection section={section} /></div>
         ))}
@@ -274,7 +410,12 @@ export default function Home() {
           </div>
         ) : filteredProducts.length > 0 ? (
           <>
-            <style dangerouslySetInnerHTML={{__html: `.product-grid{display:grid;gap:1.5rem;grid-template-columns:repeat(2,minmax(0,1fr))}@media (min-width:768px){.product-grid{grid-template-columns:repeat(${siteSettings.product_grid_columns||4},minmax(0,1fr))}}.product-zoom-simple:hover img{transform:scale(1.05)}.product-zoom-detailed:hover img{transform:scale(1.5)}.card-square{aspect-ratio:1/1}.card-portrait{aspect-ratio:3/4}.card-instagram{aspect-ratio:4/5}.card-landscape{aspect-ratio:4/3}.card-tall{aspect-ratio:2/3}`}} />
+            <style dangerouslySetInnerHTML={{__html: `.product-grid{display:grid;gap:1.5rem;grid-template-columns:repeat(2,minmax(0,1fr))}@media (min-width:768px){.product-grid{grid-template-columns:repeat(${siteSettings.product_grid_columns||4},minmax(0,1fr))}}.product-zoom-simple:hover img{transform:scale(1.05)}.product-zoom-detailed:hover img{transform:scale(1.5)}.card-square{aspect-ratio:1/1}.card-portrait{aspect-ratio:3/4}.card-instagram{aspect-ratio:4/5}.card-landscape{aspect-ratio:4/3}.card-tall{aspect-ratio:2/3}.product-slider{display:flex;gap:1.5rem;overflow-x:auto;scroll-behavior:smooth;scrollbar-width:none;-ms-overflow-style:none}.product-slider::-webkit-scrollbar{display:none}.product-slider>div{min-width:280px;flex-shrink:0}@media (min-width:768px){.product-slider>div{min-width:300px}}`}} />
+            
+            {console.log('Rendering featured card section, featuredCard:', featuredCard)}
+            {featuredCard && <FeaturedCardSection card={featuredCard} />}
+            
+            <h2 className="text-2xl font-semibold mb-6">All Products</h2>
             <div className="product-grid">
             {displayedProducts.map((product) => (
               <div key={product.id} className="group cursor-pointer" data-product-id={product.id} onClick={() => window.location.href = `/products/${product.slug || product.id}`}>
@@ -369,6 +510,16 @@ export default function Home() {
           <div key={section.id} className="mt-8"><HeroSection section={section} /></div>
         ))}
       </main>
+      
+      <ImprovedFooter 
+        settings={{
+          company_description: 'Leading provider of IT, Security and Identification solutions.',
+          locations: footerLocations,
+          quick_links: [],
+          support_links: []
+        }} 
+        siteName={siteSettings.site_name} 
+      />
     </div>
   )
 }

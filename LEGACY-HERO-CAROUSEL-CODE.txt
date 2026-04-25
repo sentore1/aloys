@@ -1,0 +1,115 @@
+/* 
+ * LEGACY HERO CAROUSEL - READY TO PASTE CODE
+ * 
+ * Instructions:
+ * 1. First run: add-hero-gallery-to-site-settings.sql in Supabase
+ * 2. Open: app/admin/page.tsx
+ * 3. Find the Legacy Hero tab section (search for: activeTab === 'hero')
+ * 4. Find this line: </div> after the single image input
+ * 5. Paste the code below AFTER that line and BEFORE the Hero Title section
+ */
+
+{/* Hero Carousel Images (Optional) */}
+<div className="border-t pt-6 mt-6">
+  <div className="flex justify-between items-center mb-4">
+    <div>
+      <label className="block text-sm font-medium mb-1">Hero Carousel Images (Optional)</label>
+      <p className="text-xs text-gray-500">
+        Add multiple images to create an auto-playing carousel. If added, these will be used instead of the single image above.
+      </p>
+    </div>
+    <button
+      type="button"
+      onClick={() => {
+        const currentGallery = Array.isArray(siteSettings.hero_gallery) 
+          ? siteSettings.hero_gallery 
+          : []
+        setSiteSettings({
+          ...siteSettings, 
+          hero_gallery: [...currentGallery, '']
+        })
+      }}
+      className="text-sm bg-gray-100 px-3 py-1 rounded hover:bg-gray-200"
+    >
+      + Add Image
+    </button>
+  </div>
+  
+  <div className="space-y-2">
+    {(Array.isArray(siteSettings.hero_gallery) ? siteSettings.hero_gallery : []).map((url: string, i: number) => (
+      <div key={i} className="flex gap-2 items-center">
+        <span className="text-sm text-gray-500 w-8">{i + 1}.</span>
+        <input
+          type="url"
+          value={url}
+          onChange={(e) => {
+            const newGallery = [...(Array.isArray(siteSettings.hero_gallery) ? siteSettings.hero_gallery : [])]
+            newGallery[i] = e.target.value
+            setSiteSettings({...siteSettings, hero_gallery: newGallery})
+          }}
+          className="flex-1 p-2 border rounded text-sm"
+          placeholder={`Carousel Image URL ${i + 1}`}
+        />
+        {url && (
+          <img 
+            src={url} 
+            alt="" 
+            className="w-10 h-10 object-cover rounded border" 
+            onError={(e) => { (e.target as HTMLImageElement).style.display = 'none' }}
+          />
+        )}
+        <button 
+          type="button" 
+          onClick={() => {
+            const newGallery = (Array.isArray(siteSettings.hero_gallery) ? siteSettings.hero_gallery : []).filter((_: string, idx: number) => idx !== i)
+            setSiteSettings({...siteSettings, hero_gallery: newGallery})
+          }} 
+          className="text-red-500 hover:text-red-700 px-2 text-xl"
+        >
+          ×
+        </button>
+      </div>
+    ))}
+    {(!siteSettings.hero_gallery || siteSettings.hero_gallery.length === 0) && (
+      <p className="text-sm text-gray-400 p-4 bg-gray-50 rounded text-center">
+        No carousel images yet. Click "+ Add Image" to start.
+      </p>
+    )}
+  </div>
+  
+  {siteSettings.hero_gallery && siteSettings.hero_gallery.length > 0 && (
+    <div className="mt-4 p-3 bg-blue-50 border border-blue-200 rounded">
+      <p className="text-sm text-blue-800">
+        <strong>Note:</strong> You have {siteSettings.hero_gallery.length} carousel images. 
+        These will auto-play on the homepage.
+      </p>
+    </div>
+  )}
+</div>
+
+/* 
+ * ALSO ADD TO INTERFACE (at the top of the file):
+ * 
+ * interface SiteSettings {
+ *   // ... existing fields ...
+ *   hero_gallery?: string[]  // Add this line
+ * }
+ * 
+ * 
+ * ALSO UPDATE saveSiteSettings function:
+ * Add this line to the payload object:
+ * 
+ * hero_gallery: JSON.stringify(siteSettings.hero_gallery || [])
+ * 
+ * 
+ * ALSO UPDATE fetchSiteSettings function:
+ * Add this code after getting data:
+ * 
+ * if (data.hero_gallery && typeof data.hero_gallery === 'string') {
+ *   try {
+ *     parsedData.hero_gallery = JSON.parse(data.hero_gallery)
+ *   } catch {
+ *     parsedData.hero_gallery = []
+ *   }
+ * }
+ */

@@ -2,9 +2,18 @@
 
 import { useState, useEffect } from 'react'
 import { useRouter } from 'next/navigation'
-import { Plus, Edit, Trash2, Package, LogOut, Settings, Image, Video, Layout } from 'lucide-react'
+import { Plus, Edit, Trash2, Package, LogOut, Settings, Image, Video, Layout, Grid, Award, Zap } from 'lucide-react'
 import { supabase } from '../../lib/supabase'
 import HeroSectionsManager from '../../components/HeroSectionsManager'
+import CategoryIconsManager from '../../components/CategoryIconsManager'
+import FeatureCardsManager from '../../components/FeatureCardsManager'
+import BrandsManager from '../../components/BrandsManager'
+import PartnershipsManager from '../../components/PartnershipsManager'
+import FeaturesManager from '../../components/FeaturesManager'
+import SolutionsManager from '../../components/SolutionsManager'
+import FooterLocationsManager from '../../components/FooterLocationsManager'
+import ContentCardsManager from '../../components/ContentCardsManager'
+import FeaturedCardsManager from '../../components/FeaturedCardsManager'
 import AnalyticsPanel from '../../components/AnalyticsPanel'
 import OrdersPanel from '../../components/OrdersPanel'
 
@@ -73,6 +82,9 @@ interface SiteSettings {
   momo_name: string
   momo_instructions: string
   momo_dial_code: string
+  footer_bg_color_start: string
+  footer_bg_color_end: string
+  footer_branding_bg_color: string
 }
 
 export default function AdminDashboard() {
@@ -126,6 +138,9 @@ export default function AdminDashboard() {
     momo_name: '',
     momo_instructions: 'Scan the QR code or tap to dial, then enter your transaction ID.',
     momo_dial_code: '+250',
+    footer_bg_color_start: '#dc2626',
+    footer_bg_color_end: '#b91c1c',
+    footer_branding_bg_color: '#ffffff',
   })
   const [formData, setFormData] = useState({
     name: '',
@@ -302,6 +317,9 @@ export default function AdminDashboard() {
           product_card_height: siteSettings.product_card_height,
           payment_paypal_enabled: siteSettings.payment_paypal_enabled,
           payment_kpay_enabled: siteSettings.payment_kpay_enabled,
+          footer_bg_color_start: siteSettings.footer_bg_color_start,
+          footer_bg_color_end: siteSettings.footer_bg_color_end,
+          footer_branding_bg_color: siteSettings.footer_branding_bg_color,
         }
 
         // Store MoMo settings and logo in site_logo as JSON (workaround for missing columns)
@@ -481,6 +499,15 @@ export default function AdminDashboard() {
             { id: 'seo', label: 'SEO', icon: Settings },
             { id: 'site', label: 'Site Settings', icon: Settings },
             { id: 'hero-sections', label: 'Hero Sections', icon: Image },
+            { id: 'category-icons', label: 'Category Icons', icon: Grid },
+            { id: 'featured-card', label: 'Featured Card', icon: Grid },
+            { id: 'feature-cards', label: 'Feature Cards', icon: Grid },
+            { id: 'features', label: 'Features', icon: Zap },
+            { id: 'solutions', label: 'Solutions', icon: Grid },
+            { id: 'content-cards', label: 'Content Cards', icon: Grid },
+            { id: 'brands', label: 'Brands', icon: Award },
+            { id: 'partnerships', label: 'Partnerships', icon: Award },
+            { id: 'footer', label: 'Footer', icon: Layout },
             { id: 'hero', label: 'Legacy Hero', icon: Video },
             { id: 'layout', label: 'Layout', icon: Layout }
           ].map(tab => (
@@ -502,6 +529,33 @@ export default function AdminDashboard() {
 
         {/* Hero Sections Manager Tab */}
         {activeTab === 'hero-sections' && <HeroSectionsManager />}
+
+        {/* Category Icons Manager Tab */}
+        {activeTab === 'category-icons' && <CategoryIconsManager />}
+
+        {/* Featured Card Manager Tab */}
+        {activeTab === 'featured-card' && <FeaturedCardsManager />}
+
+        {/* Feature Cards Manager Tab */}
+        {activeTab === 'feature-cards' && <FeatureCardsManager />}
+
+        {/* Brands Manager Tab */}
+        {activeTab === 'brands' && <BrandsManager />}
+
+        {/* Partnerships Manager Tab */}
+        {activeTab === 'partnerships' && <PartnershipsManager />}
+
+        {/* Features Manager Tab */}
+        {activeTab === 'features' && <FeaturesManager />}
+
+        {/* Solutions Manager Tab */}
+        {activeTab === 'solutions' && <SolutionsManager />}
+
+        {/* Content Cards Manager Tab */}
+        {activeTab === 'content-cards' && <ContentCardsManager />}
+
+        {/* Footer Locations Manager Tab */}
+        {activeTab === 'footer' && <FooterLocationsManager />}
 
         {/* SEO Tab */}
         {activeTab === 'seo' && (
@@ -1273,6 +1327,42 @@ export default function AdminDashboard() {
                     <option value="'Avant Garde', sans-serif">Avant Garde</option>
                     <option value="system-ui">System UI</option>
                   </select>
+                </div>
+              </div>
+
+              <div className="border-t pt-6">
+                <h3 className="text-base font-medium mb-4">Footer Colors</h3>
+                <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+                  <div>
+                    <label className="block text-sm font-medium mb-2">Footer Background Start</label>
+                    <input
+                      type="color"
+                      value={siteSettings.footer_bg_color_start || '#dc2626'}
+                      onChange={(e) => setSiteSettings({...siteSettings, footer_bg_color_start: e.target.value})}
+                      className="w-full p-3 border border-gray-300 rounded focus:outline-none focus:border-black h-12"
+                    />
+                    <p className="text-xs text-gray-500 mt-1">Gradient start color (default: red-600)</p>
+                  </div>
+                  <div>
+                    <label className="block text-sm font-medium mb-2">Footer Background End</label>
+                    <input
+                      type="color"
+                      value={siteSettings.footer_bg_color_end || '#b91c1c'}
+                      onChange={(e) => setSiteSettings({...siteSettings, footer_bg_color_end: e.target.value})}
+                      className="w-full p-3 border border-gray-300 rounded focus:outline-none focus:border-black h-12"
+                    />
+                    <p className="text-xs text-gray-500 mt-1">Gradient end color (default: red-700)</p>
+                  </div>
+                  <div>
+                    <label className="block text-sm font-medium mb-2">Branding Section Background</label>
+                    <input
+                      type="color"
+                      value={siteSettings.footer_branding_bg_color || '#ffffff'}
+                      onChange={(e) => setSiteSettings({...siteSettings, footer_branding_bg_color: e.target.value})}
+                      className="w-full p-3 border border-gray-300 rounded focus:outline-none focus:border-black h-12"
+                    />
+                    <p className="text-xs text-gray-500 mt-1">Large branding section (default: white)</p>
+                  </div>
                 </div>
               </div>
 

@@ -100,14 +100,29 @@ export default function HeroSectionsManager() {
     fetchSections()
   }
 
-  const updateGalleryImage = (section: HeroSection, index: number, url: string) => {
-    const imgs = [...section.hero_gallery_images]
-    imgs[index] = url
-    updateSection(section.id, { hero_gallery_images: imgs })
-  }
+  const uploadImage = async (file: File, section: HeroSection) => {
+    const fileExt = file.name.split('.').pop()
+    const fileName = `${Math.random()}.${fileExt}`
+    const filePath = `hero/${fileName}`
 
-  const addGalleryImage = (section: HeroSection) => {
-    updateSection(section.id, { hero_gallery_images: [...section.hero_gallery_images, ''] })
+    const { error: uploadError } = await supabase.storage
+      .from('images')
+      .upload(filePath, file)
+
+    if (uploadError) {
+      alert(`Upload failed: ${uploadError.message}`)
+      return
+    }
+
+    const { data } = supabase.storage.from('images').getPublicUrl(filePath)
+    const newImages = [...section.hero_gallery_images, data.publicUrl]
+    
+    const { error } = await supabase
+      .from('hero_sections')
+      .update({ hero_gallery_images: JSON.stringify(newImages) })
+      .eq('id', section.id)
+    
+    if (!error) fetchSections()
   }
 
   const removeGalleryImage = (section: HeroSection, index: number) => {
@@ -120,10 +135,18 @@ export default function HeroSectionsManager() {
     <div className="bg-white rounded-lg border p-6">
       <div className="flex justify-between items-center mb-6">
         <h2 className="text-xl font-medium">Hero Sections</h2>
-        <button onClick={addSection} className="bg-black text-white px-4 py-2 rounded flex items-center gap-2">
+        <button onClick={addSection} className="bg-black text-white px-4 py-2 rounded flex items-center gap-2 hover:bg-gray-800">
           <Plus className="w-4 h-4" /> Add Section
         </button>
       </div>
+
+      {sections.length === 0 && (
+        <div className="bg-blue-50 border border-blue-200 rounded-lg p-6 mb-6 text-center">
+          <p className="text-blue-800 font-medium mb-2">No hero sections yet</p>
+          <p className="text-blue-600 text-sm mb-4">Click "Add Section" to create your first hero carousel</p>
+          <p className="text-xs text-blue-500">Tip: Choose "Slider" type for auto-playing carousel</p>
+        </div>
+      )}
 
       <div className="space-y-4">
         {sections.map((section, index) => (
@@ -181,45 +204,79 @@ export default function HeroSectionsManager() {
               </div>
             </div>
 
-            {/* Single content URL for image/video */}
             {(section.hero_type === 'image' || section.hero_type === 'video') && (
               <div>
-                <label className="block text-sm font-medium mb-1">Content URL</label>
-                <input type="url" value={section.hero_content ?? ''} onChange={(e) => updateSection(section.id, { hero_content: e.target.value })} className="w-full p-2 border rounded" placeholder="Image or Video URL" />
+                <label className="block text-sm font-medium mb-1">Content</label>
+                <div className="flex gap-2">
+                  {section.hero_content && <img src={section.hero_content} alt="" className="w-20 h-20 object-cover rounded border" />}
+                  <label className="flex-1 cursor-pointer">
+                    <div className="w-full p-2 border rounded bg-gray-50 hover:bg-gray-100 text-center">
+                      {section.hero_content ? 'Change' : 'Upload'} {section.hero_type}
+                    </div>
+                    <input
+                      type="file"
+                      accept={section.hero_type === 'image' ? 'image/*' : 'video/*'}
+                      className="hidden"
+                      onChange={async (e) => {
+                        const file = e.target.files?.[0]
+                        if (!file) return
+                        const fileExt = file.name.split('.').pop()
+                        const fileName = `${Math.random()}.${fileExt}`
+                        const filePath = `hero/${fileName}`
+                        const { error: uploadError } = await supabase.storage.from('images').upload(filePath, file)
+                        if (uploadError) { alert(`Upload failed: ${uploadError.message}`); return }
+                        const { data } = supabase.storage.from('images').getPublicUrl(filePath)
+                        updateSection(section.id, { hero_content: data.publicUrl })
+                      }}
+                    />
+                  </label>
+                </div>
               </div>
             )}
 
-            {/* Gallery / Slider image list */}
             {(section.hero_type === 'gallery' || section.hero_type === 'slider') && (
-              <div>
-                <div className="flex justify-between items-center mb-2">
+              <div className="border-t pt-4">
+                <div className="flex justify-between items-center mb-3">
                   <label className="block text-sm font-medium">
                     {section.hero_type === 'gallery' ? 'Gallery Images' : 'Slider Images'}
+                    <span className="text-xs text-gray-500 ml-2">({section.hero_gallery_images.length} images)</span>
                   </label>
-                  <button
-                    type="button"
-                    onClick={() => addGalleryImage(section)}
-                    className="text-sm bg-gray-100 px-3 py-1 rounded hover:bg-gray-200"
-                  >
-                    + Add Image
-                  </button>
+                  <label className="text-sm bg-blue-500 text-white px-4 py-2 rounded hover:bg-blue-600 transition-colors flex items-center gap-1 cursor-pointer">
+                    <Plus className="w-4 h-4" /> Upload Image
+                    <input
+                      type="file"
+                      accept="image/*"
+                      className="hidden"
+                      onChange={(e) => {
+                        const file = e.target.files?.[0]
+                        if (file) uploadImage(file, section)
+                      }}
+                    />
+                  </label>
                 </div>
                 <div className="space-y-2">
                   {section.hero_gallery_images.map((url, i) => (
-                    <div key={i} className="flex gap-2 items-center">
-                      <input
-                        type="url"
-                        value={url}
-                        onChange={(e) => updateGalleryImage(section, i, e.target.value)}
-                        className="flex-1 p-2 border rounded text-sm"
-                        placeholder={`Image URL ${i + 1}`}
-                      />
-                      {url && <img src={url} alt="" className="w-10 h-10 object-cover rounded border" onError={(e) => { (e.target as HTMLImageElement).style.display = 'none' }} />}
-                      <button type="button" onClick={() => removeGalleryImage(section, i)} className="text-red-500 hover:text-red-700 px-2">×</button>
+                    <div key={i} className="flex gap-2 items-center bg-gray-50 p-2 rounded">
+                      <span className="text-sm text-gray-500 w-6">{i + 1}.</span>
+                      {url && <img src={url} alt="" className="w-20 h-20 object-cover rounded border" />}
+                      <span className="flex-1 text-sm text-gray-600 truncate">{url.split('/').pop()}</span>
+                      <button 
+                        type="button" 
+                        onClick={(e) => {
+                          e.preventDefault()
+                          removeGalleryImage(section, i)
+                        }} 
+                        className="text-red-500 hover:text-red-700 px-2 text-xl font-bold"
+                      >
+                        ×
+                      </button>
                     </div>
                   ))}
                   {section.hero_gallery_images.length === 0 && (
-                    <p className="text-sm text-gray-400">No images yet. Click &quot;+ Add Image&quot; to start.</p>
+                    <div className="text-center p-6 bg-gray-50 rounded border-2 border-dashed border-gray-300">
+                      <p className="text-sm text-gray-500 mb-2">No images yet</p>
+                      <p className="text-xs text-gray-400">Click "Upload Image" button above to start</p>
+                    </div>
                   )}
                 </div>
               </div>
