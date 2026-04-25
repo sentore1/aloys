@@ -53,23 +53,51 @@ export default function SolutionsManager() {
   }
 
   const saveEdit = async (id: string) => {
-    const updates = {
-      title: editForm.title,
-      description: editForm.description,
-      image: editForm.image,
-      link: editForm.link,
-      features: JSON.stringify(editForm.features.split('\n').filter((f: string) => f.trim()))
-    }
-    
-    const { error } = await supabase.from('solutions').update(updates).eq('id', id)
-    if (error) {
-      console.error('Error updating solution:', error)
-      alert(`Error updating: ${error.message}`)
-    } else {
-      alert('Solution saved successfully!')
-      setEditingId(null)
-      setEditForm({})
-      fetchSolutions()
+    try {
+      console.log('Saving solution:', id)
+      console.log('Edit form data:', editForm)
+      
+      // Validate required fields
+      if (!editForm.title || !editForm.description) {
+        alert('Title and Description are required')
+        return
+      }
+      
+      const updates = {
+        title: editForm.title.trim(),
+        description: editForm.description.trim(),
+        image: editForm.image?.trim() || '',
+        link: editForm.link?.trim() || '',
+        features: JSON.stringify(
+          (editForm.features || '')
+            .split('\n')
+            .map((f: string) => f.trim())
+            .filter((f: string) => f.length > 0)
+        )
+      }
+      
+      console.log('Updates to send:', updates)
+      
+      const { data, error } = await supabase
+        .from('solutions')
+        .update(updates)
+        .eq('id', id)
+        .select()
+      
+      console.log('Update response:', { data, error })
+      
+      if (error) {
+        console.error('Error updating solution:', error)
+        alert(`Error updating: ${error.message}`)
+      } else {
+        alert('Solution saved successfully!')
+        setEditingId(null)
+        setEditForm({})
+        await fetchSolutions()
+      }
+    } catch (err) {
+      console.error('Exception in saveEdit:', err)
+      alert(`Exception: ${err}`)
     }
   }
 

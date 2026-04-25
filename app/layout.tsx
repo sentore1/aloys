@@ -4,6 +4,7 @@ import "./globals.css";
 import NavbarWrapper from "../components/NavbarWrapper";
 import { generateOrganizationJsonLd } from "../lib/seo";
 import AnalyticsTracker from "../components/AnalyticsTracker";
+import WhatsAppButton from "../components/WhatsAppButton";
 
 const geistSans = Geist({
   variable: "--font-geist-sans",
@@ -69,6 +70,7 @@ export default function RootLayout({
         <AnalyticsTracker />
         <NavbarWrapper />
         {children}
+        <WhatsAppButton />
       </body>
     </html>
   );

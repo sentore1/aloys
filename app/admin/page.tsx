@@ -85,6 +85,8 @@ interface SiteSettings {
   footer_bg_color_start: string
   footer_bg_color_end: string
   footer_branding_bg_color: string
+  footer_text_color: string
+  footer_branding_text_color: string
 }
 
 export default function AdminDashboard() {
@@ -141,6 +143,8 @@ export default function AdminDashboard() {
     footer_bg_color_start: '#dc2626',
     footer_bg_color_end: '#b91c1c',
     footer_branding_bg_color: '#ffffff',
+    footer_text_color: '#ffffff',
+    footer_branding_text_color: '#000000',
   })
   const [formData, setFormData] = useState({
     name: '',
@@ -320,6 +324,8 @@ export default function AdminDashboard() {
           footer_bg_color_start: siteSettings.footer_bg_color_start,
           footer_bg_color_end: siteSettings.footer_bg_color_end,
           footer_branding_bg_color: siteSettings.footer_branding_bg_color,
+          footer_text_color: siteSettings.footer_text_color,
+          footer_branding_text_color: siteSettings.footer_branding_text_color,
         }
 
         // Store MoMo settings and logo in site_logo as JSON (workaround for missing columns)
@@ -465,10 +471,39 @@ export default function AdminDashboard() {
     setPreviewImages([...newImages])
   }
 
-  const handleFileUpload = (file: File, callback: (url: string) => void) => {
-    const reader = new FileReader()
-    reader.onload = (e) => callback(e.target?.result as string)
-    reader.readAsDataURL(file)
+  const handleFileUpload = async (file: File, callback: (url: string) => void) => {
+    try {
+      console.log('Starting upload for file:', file.name, 'Size:', file.size)
+      
+      const fileExt = file.name.split('.').pop()
+      const fileName = `${Math.random().toString(36).substring(2)}-${Date.now()}.${fileExt}`
+      const filePath = `products/${fileName}`
+
+      console.log('Uploading to path:', filePath)
+
+      const { data, error } = await supabase.storage
+        .from('product-images')
+        .upload(filePath, file)
+
+      console.log('Upload response:', { data, error })
+
+      if (error) {
+        console.error('Upload error:', error)
+        alert(`Failed to upload image: ${error.message}`)
+        return
+      }
+
+      const { data: { publicUrl } } = supabase.storage
+        .from('product-images')
+        .getPublicUrl(filePath)
+
+      console.log('Public URL:', publicUrl)
+      callback(publicUrl)
+      alert('Image uploaded successfully!')
+    } catch (err: any) {
+      console.error('Upload exception:', err)
+      alert(`Failed to upload image: ${err?.message || err}`)
+    }
   }
 
   return (
@@ -784,13 +819,29 @@ export default function AdminDashboard() {
                 </div>
                 <div>
                   <label className="block text-sm font-medium mb-2">Site Logo URL</label>
-                  <input
-                    type="url"
-                    value={siteSettings.site_logo}
-                    onChange={(e) => setSiteSettings({...siteSettings, site_logo: e.target.value})}
-                    className="w-full p-3 border border-gray-300 rounded focus:outline-none focus:border-black"
-                    placeholder="Logo URL"
-                  />
+                  <div className="flex gap-2">
+                    <input
+                      type="url"
+                      value={siteSettings.site_logo}
+                      onChange={(e) => setSiteSettings({...siteSettings, site_logo: e.target.value})}
+                      className="flex-1 p-3 border border-gray-300 rounded focus:outline-none focus:border-black"
+                      placeholder="Logo URL"
+                    />
+                    <label className="p-2 border border-gray-300 rounded bg-gray-50 hover:bg-gray-100 cursor-pointer flex items-center">
+                      Upload
+                      <input
+                        type="file"
+                        accept="image/*"
+                        onChange={(e) => {
+                          const file = e.target.files?.[0]
+                          if (file) {
+                            handleFileUpload(file, (url) => setSiteSettings({...siteSettings, site_logo: url}))
+                          }
+                        }}
+                        className="hidden"
+                      />
+                    </label>
+                  </div>
                 </div>
               </div>
 
@@ -915,17 +966,20 @@ export default function AdminDashboard() {
                     className="flex-1 p-3 border border-gray-300 rounded focus:outline-none focus:border-black"
                     placeholder={siteSettings.hero_type === 'image' ? 'Image URL' : 'Video URL'}
                   />
-                  <input
-                    type="file"
-                    accept={siteSettings.hero_type === 'image' ? 'image/*' : 'video/*'}
-                    onChange={(e) => {
-                      const file = e.target.files?.[0]
-                      if (file) {
-                        handleFileUpload(file, (url) => setSiteSettings({...siteSettings, hero_content: url}))
-                      }
-                    }}
-                    className="p-2 border border-gray-300 rounded"
-                  />
+                  <label className="p-2 border border-gray-300 rounded bg-gray-50 hover:bg-gray-100 cursor-pointer flex items-center">
+                    Upload
+                    <input
+                      type="file"
+                      accept={siteSettings.hero_type === 'image' ? 'image/*' : 'video/*'}
+                      onChange={(e) => {
+                        const file = e.target.files?.[0]
+                        if (file) {
+                          handleFileUpload(file, (url) => setSiteSettings({...siteSettings, hero_content: url}))
+                        }
+                      }}
+                      className="hidden"
+                    />
+                  </label>
                 </div>
               </div>
 
@@ -1332,7 +1386,7 @@ export default function AdminDashboard() {
 
               <div className="border-t pt-6">
                 <h3 className="text-base font-medium mb-4">Footer Colors</h3>
-                <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+                <div className="grid grid-cols-1 md:grid-cols-3 gap-4 mb-4">
                   <div>
                     <label className="block text-sm font-medium mb-2">Footer Background Start</label>
                     <input
@@ -1364,6 +1418,28 @@ export default function AdminDashboard() {
                     <p className="text-xs text-gray-500 mt-1">Large branding section (default: white)</p>
                   </div>
                 </div>
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                  <div>
+                    <label className="block text-sm font-medium mb-2">Footer Text Color</label>
+                    <input
+                      type="color"
+                      value={siteSettings.footer_text_color || '#ffffff'}
+                      onChange={(e) => setSiteSettings({...siteSettings, footer_text_color: e.target.value})}
+                      className="w-full p-3 border border-gray-300 rounded focus:outline-none focus:border-black h-12"
+                    />
+                    <p className="text-xs text-gray-500 mt-1">Text color in footer section (default: white)</p>
+                  </div>
+                  <div>
+                    <label className="block text-sm font-medium mb-2">Branding Text Color</label>
+                    <input
+                      type="color"
+                      value={siteSettings.footer_branding_text_color || '#000000'}
+                      onChange={(e) => setSiteSettings({...siteSettings, footer_branding_text_color: e.target.value})}
+                      className="w-full p-3 border border-gray-300 rounded focus:outline-none focus:border-black h-12"
+                    />
+                    <p className="text-xs text-gray-500 mt-1">Text color in branding section (default: black)</p>
+                  </div>
+                </div>
               </div>
 
               <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
@@ -1386,17 +1462,20 @@ export default function AdminDashboard() {
                       className="flex-1 p-3 border border-gray-300 rounded focus:outline-none focus:border-black"
                       placeholder="Logo URL"
                     />
-                    <input
-                      type="file"
-                      accept="image/*"
-                      onChange={(e) => {
-                        const file = e.target.files?.[0]
-                        if (file) {
-                          handleFileUpload(file, (url) => setSiteSettings({...siteSettings, site_logo: url}))
-                        }
-                      }}
-                      className="p-2 border border-gray-300 rounded"
-                    />
+                    <label className="p-2 border border-gray-300 rounded bg-gray-50 hover:bg-gray-100 cursor-pointer flex items-center">
+                      Upload
+                      <input
+                        type="file"
+                        accept="image/*"
+                        onChange={(e) => {
+                          const file = e.target.files?.[0]
+                          if (file) {
+                            handleFileUpload(file, (url) => setSiteSettings({...siteSettings, site_logo: url}))
+                          }
+                        }}
+                        className="hidden"
+                      />
+                    </label>
                   </div>
                 </div>
               </div>
@@ -1577,15 +1656,18 @@ export default function AdminDashboard() {
                             className="flex-1 p-3 border border-gray-300 rounded focus:outline-none focus:border-black"
                             required={index === 0}
                           />
-                          <input
-                            type="file"
-                            accept="image/*"
-                            onChange={(e) => {
-                              const file = e.target.files?.[0]
-                              if (file) handleFileUpload(file, (url) => updateImageUrl(index, url))
-                            }}
-                            className="w-24 p-2 border border-gray-300 rounded text-xs"
-                          />
+                          <label className="w-24 p-2 border border-gray-300 rounded text-xs bg-gray-50 hover:bg-gray-100 cursor-pointer text-center flex items-center justify-center">
+                            Upload
+                            <input
+                              type="file"
+                              accept="image/*"
+                              onChange={(e) => {
+                                const file = e.target.files?.[0]
+                                if (file) handleFileUpload(file, (url) => updateImageUrl(index, url))
+                              }}
+                              className="hidden"
+                            />
+                          </label>
                         </div>
                       </div>
                       

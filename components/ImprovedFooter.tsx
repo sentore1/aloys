@@ -25,14 +25,31 @@ interface FooterSettings {
 }
 
 export default function ImprovedFooter({ settings, siteName }: { settings: FooterSettings, siteName: string }) {
-  const enabledLocations = settings.locations?.filter(l => l.enabled) || []
+  // Ensure settings has default values
+  const safeSettings = {
+    company_description: settings?.company_description || 'Leading provider of IT, Security and Identification solutions.',
+    locations: settings?.locations || [],
+    social_facebook: settings?.social_facebook,
+    social_twitter: settings?.social_twitter,
+    social_instagram: settings?.social_instagram,
+    social_linkedin: settings?.social_linkedin,
+    social_youtube: settings?.social_youtube,
+    quick_links: settings?.quick_links || [],
+    support_links: settings?.support_links || []
+  }
+  
+  const enabledLocations = safeSettings.locations.filter(l => l.enabled) || []
   const [footerColors, setFooterColors] = useState({
     bgStart: '#dc2626',
     bgEnd: '#b91c1c',
-    brandingBg: '#ffffff'
+    brandingBg: '#ffffff',
+    textColor: '#ffffff',
+    brandingTextColor: '#000000'
   })
+  const [mounted, setMounted] = useState(false)
 
   useEffect(() => {
+    setMounted(true)
     fetchFooterColors()
   }, [])
 
@@ -40,14 +57,16 @@ export default function ImprovedFooter({ settings, siteName }: { settings: Foote
     try {
       const { data } = await supabase
         .from('site_settings')
-        .select('footer_bg_color_start, footer_bg_color_end, footer_branding_bg_color')
+        .select('footer_bg_color_start, footer_bg_color_end, footer_branding_bg_color, footer_text_color, footer_branding_text_color')
         .single()
       
       if (data) {
         setFooterColors({
           bgStart: data.footer_bg_color_start || '#dc2626',
           bgEnd: data.footer_bg_color_end || '#b91c1c',
-          brandingBg: data.footer_branding_bg_color || '#ffffff'
+          brandingBg: data.footer_branding_bg_color || '#ffffff',
+          textColor: data.footer_text_color || '#ffffff',
+          brandingTextColor: data.footer_branding_text_color || '#000000'
         })
       }
     } catch (error) {
@@ -57,7 +76,7 @@ export default function ImprovedFooter({ settings, siteName }: { settings: Foote
 
   return (
     <>
-    <footer style={{ background: `linear-gradient(to bottom right, ${footerColors.bgStart}, ${footerColors.bgEnd})` }} className="text-white">
+    <footer style={{ background: `linear-gradient(to bottom right, ${footerColors.bgStart}, ${footerColors.bgEnd})`, color: footerColors.textColor }} className="text-white">
       {/* Locations Section */}
       {enabledLocations.length > 0 && (
         <div className="border-b border-red-500">
@@ -109,32 +128,32 @@ export default function ImprovedFooter({ settings, siteName }: { settings: Foote
           {/* Company Info */}
           <div>
             <h3 className="text-2xl font-bold mb-4">{siteName}</h3>
-            <p className="text-sm text-red-100 mb-4">
-              {settings.company_description || 'Leading provider of IT, Security and Identification solutions.'}
+            <p className="text-sm mb-4" style={{ opacity: 0.9 }}>
+              {safeSettings.company_description}
             </p>
             <div className="flex gap-3">
-              {settings.social_facebook && (
-                <a href={settings.social_facebook} target="_blank" rel="noopener noreferrer" className="w-8 h-8 bg-white/20 rounded-full flex items-center justify-center hover:bg-white/30 transition-colors">
+              {safeSettings.social_facebook && (
+                <a href={safeSettings.social_facebook} target="_blank" rel="noopener noreferrer" className="w-8 h-8 bg-white/20 rounded-full flex items-center justify-center hover:bg-white/30 transition-colors">
                   <Facebook className="w-4 h-4" />
                 </a>
               )}
-              {settings.social_twitter && (
-                <a href={settings.social_twitter} target="_blank" rel="noopener noreferrer" className="w-8 h-8 bg-white/20 rounded-full flex items-center justify-center hover:bg-white/30 transition-colors">
+              {safeSettings.social_twitter && (
+                <a href={safeSettings.social_twitter} target="_blank" rel="noopener noreferrer" className="w-8 h-8 bg-white/20 rounded-full flex items-center justify-center hover:bg-white/30 transition-colors">
                   <Twitter className="w-4 h-4" />
                 </a>
               )}
-              {settings.social_instagram && (
-                <a href={settings.social_instagram} target="_blank" rel="noopener noreferrer" className="w-8 h-8 bg-white/20 rounded-full flex items-center justify-center hover:bg-white/30 transition-colors">
+              {safeSettings.social_instagram && (
+                <a href={safeSettings.social_instagram} target="_blank" rel="noopener noreferrer" className="w-8 h-8 bg-white/20 rounded-full flex items-center justify-center hover:bg-white/30 transition-colors">
                   <Instagram className="w-4 h-4" />
                 </a>
               )}
-              {settings.social_linkedin && (
-                <a href={settings.social_linkedin} target="_blank" rel="noopener noreferrer" className="w-8 h-8 bg-white/20 rounded-full flex items-center justify-center hover:bg-white/30 transition-colors">
+              {safeSettings.social_linkedin && (
+                <a href={safeSettings.social_linkedin} target="_blank" rel="noopener noreferrer" className="w-8 h-8 bg-white/20 rounded-full flex items-center justify-center hover:bg-white/30 transition-colors">
                   <Linkedin className="w-4 h-4" />
                 </a>
               )}
-              {settings.social_youtube && (
-                <a href={settings.social_youtube} target="_blank" rel="noopener noreferrer" className="w-8 h-8 bg-white/20 rounded-full flex items-center justify-center hover:bg-white/30 transition-colors">
+              {safeSettings.social_youtube && (
+                <a href={safeSettings.social_youtube} target="_blank" rel="noopener noreferrer" className="w-8 h-8 bg-white/20 rounded-full flex items-center justify-center hover:bg-white/30 transition-colors">
                   <Youtube className="w-4 h-4" />
                 </a>
               )}
@@ -144,28 +163,30 @@ export default function ImprovedFooter({ settings, siteName }: { settings: Foote
           {/* Our Products */}
           <div>
             <h4 className="font-bold mb-4">Our Products</h4>
-            <ul className="space-y-2 text-sm text-red-100">
-              <li><a href="/products?category=servers" className="hover:text-white">Servers</a></li>
-              <li><a href="/products?category=printers" className="hover:text-white">ID Card Printers</a></li>
-              <li><a href="/products?category=access" className="hover:text-white">Access Control</a></li>
-              <li><a href="/products?category=biometric" className="hover:text-white">Biometric Devices</a></li>
+            <ul className="space-y-2 text-sm" style={{ opacity: 0.9 }}>
+              <li><a href="/servers" className="hover:opacity-100 transition-colors">Servers</a></li>
+              <li><a href="/id-card-printers" className="hover:opacity-100 transition-colors">ID Card Printers</a></li>
+              <li><a href="/access-control" className="hover:opacity-100 transition-colors">Access Control</a></li>
+              <li><a href="/biometric-devices" className="hover:opacity-100 transition-colors">Biometric Devices</a></li>
             </ul>
           </div>
 
           {/* Quick Links */}
           <div>
             <h4 className="font-bold mb-4">Quick Links</h4>
-            <ul className="space-y-2 text-sm text-red-100">
-              {settings.quick_links?.map((link, i) => (
-                <li key={i}>
-                  <a href={link.url} className="hover:text-white">{link.label}</a>
-                </li>
-              )) || (
+            <ul className="space-y-2 text-sm" style={{ opacity: 0.9 }}>
+              {(safeSettings.quick_links && safeSettings.quick_links.length > 0) ? (
+                safeSettings.quick_links.map((link, i) => (
+                  <li key={i}>
+                    <a href={link.url} className="hover:opacity-100 transition-colors">{link.label}</a>
+                  </li>
+                ))
+              ) : (
                 <>
-                  <li><a href="/about" className="hover:text-white">About Us</a></li>
-                  <li><a href="/products" className="hover:text-white">Products</a></li>
-                  <li><a href="/contact" className="hover:text-white">Contact</a></li>
-                  <li><a href="/blog" className="hover:text-white">Blog</a></li>
+                  <li><a href="/products" className="hover:opacity-100 transition-colors">All Products</a></li>
+                  <li><a href="/cart" className="hover:opacity-100 transition-colors">Shopping Cart</a></li>
+                  <li><a href="/account" className="hover:opacity-100 transition-colors">My Account</a></li>
+                  <li><a href="/login" className="hover:opacity-100 transition-colors">Login</a></li>
                 </>
               )}
             </ul>
@@ -174,17 +195,19 @@ export default function ImprovedFooter({ settings, siteName }: { settings: Foote
           {/* Help & Support */}
           <div>
             <h4 className="font-bold mb-4">Help & Support</h4>
-            <ul className="space-y-2 text-sm text-red-100">
-              {settings.support_links?.map((link, i) => (
-                <li key={i}>
-                  <a href={link.url} className="hover:text-white">{link.label}</a>
-                </li>
-              )) || (
+            <ul className="space-y-2 text-sm" style={{ opacity: 0.9 }}>
+              {(safeSettings.support_links && safeSettings.support_links.length > 0) ? (
+                safeSettings.support_links.map((link, i) => (
+                  <li key={i}>
+                    <a href={link.url} className="hover:opacity-100 transition-colors">{link.label}</a>
+                  </li>
+                ))
+              ) : (
                 <>
-                  <li><a href="/support" className="hover:text-white">Support Center</a></li>
-                  <li><a href="/faq" className="hover:text-white">FAQ</a></li>
-                  <li><a href="/warranty" className="hover:text-white">Warranty</a></li>
-                  <li><a href="/returns" className="hover:text-white">Returns</a></li>
+                  <li><a href="/support" className="hover:opacity-100 transition-colors">Support Center</a></li>
+                  <li><a href="/support" className="hover:opacity-100 transition-colors">FAQ</a></li>
+                  <li><a href="/warranty" className="hover:opacity-100 transition-colors">Warranty Info</a></li>
+                  <li><a href="/contact" className="hover:opacity-100 transition-colors">Contact Us</a></li>
                 </>
               )}
             </ul>
@@ -192,18 +215,18 @@ export default function ImprovedFooter({ settings, siteName }: { settings: Foote
         </div>
 
         {/* Bottom Bar */}
-        <div className="border-t border-red-500 pt-6 pb-6">
+        <div className="border-t border-red-500 pt-6">
         </div>
       </div>
     </footer>
     
     {/* Large Branding Section */}
-    <div style={{ backgroundColor: footerColors.brandingBg }} className="py-12">
+    <div style={{ backgroundColor: footerColors.brandingBg, color: footerColors.brandingTextColor }} className="py-8">
       <div className="max-w-7xl mx-auto px-4 flex flex-col items-center justify-center text-center">
-        <h2 className="text-6xl md:text-8xl font-bold text-black mb-6">
+        <h2 className="text-5xl md:text-7xl font-bold text-black mb-4">
           {siteName}<sup style={{ fontSize: '0.5em' }}>™</sup>
         </h2>
-        <div className="flex flex-col sm:flex-row items-center justify-center gap-2 text-gray-500 text-sm">
+        <div className="flex flex-col sm:flex-row items-center justify-center gap-2 text-sm" style={{ opacity: 0.8 }}>
           <p>
             © {new Date().getFullYear()} {siteName}<sup style={{ fontSize: '0.5em' }}>™</sup>. All rights reserved.
           </p>

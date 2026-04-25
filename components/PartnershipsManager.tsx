@@ -16,6 +16,41 @@ export default function PartnershipsManager() {
     setLoading(false)
   }
 
+  const handleFileUpload = async (file: File, callback: (url: string) => void) => {
+    try {
+      console.log('Starting upload for file:', file.name, 'Size:', file.size)
+      
+      const fileExt = file.name.split('.').pop()
+      const fileName = `${Math.random().toString(36).substring(2)}-${Date.now()}.${fileExt}`
+      const filePath = `partnerships/${fileName}`
+
+      console.log('Uploading to path:', filePath)
+
+      const { data, error } = await supabase.storage
+        .from('product-images')
+        .upload(filePath, file)
+
+      console.log('Upload response:', { data, error })
+
+      if (error) {
+        console.error('Upload error:', error)
+        alert(`Failed to upload image: ${error.message}`)
+        return
+      }
+
+      const { data: { publicUrl } } = supabase.storage
+        .from('product-images')
+        .getPublicUrl(filePath)
+
+      console.log('Public URL:', publicUrl)
+      callback(publicUrl)
+      alert('Image uploaded successfully!')
+    } catch (err: any) {
+      console.error('Upload exception:', err)
+      alert(`Failed to upload image: ${err?.message || err}`)
+    }
+  }
+
   const addPartnership = async () => {
     const { error } = await supabase.from('partnerships').insert([{
       title: 'New Partnership',
@@ -130,13 +165,29 @@ export default function PartnershipsManager() {
               <div className="space-y-4">
                 <div>
                   <label className="block text-sm font-medium mb-1">Certificate/Image URL</label>
-                  <input
-                    type="url"
-                    value={partnership.certificate_image}
-                    onChange={(e) => updatePartnership(partnership.id, { certificate_image: e.target.value })}
-                    className="w-full p-2 border rounded"
-                    placeholder="https://example.com/certificate.jpg"
-                  />
+                  <div className="flex gap-2">
+                    <input
+                      type="url"
+                      value={partnership.certificate_image}
+                      onChange={(e) => updatePartnership(partnership.id, { certificate_image: e.target.value })}
+                      className="flex-1 p-2 border rounded"
+                      placeholder="https://example.com/certificate.jpg"
+                    />
+                    <label className="p-2 border border-gray-300 rounded bg-gray-50 hover:bg-gray-100 cursor-pointer flex items-center">
+                      Upload
+                      <input
+                        type="file"
+                        accept="image/*"
+                        onChange={(e) => {
+                          const file = e.target.files?.[0]
+                          if (file) {
+                            handleFileUpload(file, (url) => updatePartnership(partnership.id, { certificate_image: url }))
+                          }
+                        }}
+                        className="hidden"
+                      />
+                    </label>
+                  </div>
                 </div>
 
                 {partnership.certificate_image && (

@@ -4,7 +4,7 @@ interface Solution {
   title: string
   description: string
   image: string
-  features: string[]
+  features: string[] | string
   link: string
   enabled: boolean
 }
@@ -22,6 +22,15 @@ export default function SolutionsSection({
   
   if (enabledSolutions.length === 0) return null
 
+  const parseFeatures = (features: string[] | string): string[] => {
+    if (Array.isArray(features)) return features
+    try {
+      return JSON.parse(features || '[]')
+    } catch {
+      return []
+    }
+  }
+
   return (
     <section className="py-12">
       <div className="text-center mb-12">
@@ -37,7 +46,10 @@ export default function SolutionsSection({
       </div>
 
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-        {enabledSolutions.map((solution, i) => (
+        {enabledSolutions.map((solution, i) => {
+          const features = parseFeatures(solution.features)
+          
+          return (
           <div key={i} className="bg-white border border-gray-200 rounded-lg overflow-hidden hover:shadow-xl transition-shadow">
             <div className="relative h-48 bg-gradient-to-br from-gray-900 to-red-900">
               <img 
@@ -56,9 +68,9 @@ export default function SolutionsSection({
               <h3 className="text-xl font-bold mb-3">{solution.title}</h3>
               <p className="text-gray-600 text-sm mb-4 line-clamp-3">{solution.description}</p>
               
-              {solution.features && solution.features.length > 0 && (
+              {features.length > 0 && (
                 <ul className="space-y-2 mb-4">
-                  {solution.features.slice(0, 3).map((feature, idx) => (
+                  {features.slice(0, 3).map((feature, idx) => (
                     <li key={idx} className="flex items-start gap-2 text-sm">
                       <span className="text-red-500 mt-1">✓</span>
                       <span className="text-gray-700">{feature}</span>
@@ -75,7 +87,7 @@ export default function SolutionsSection({
               </a>
             </div>
           </div>
-        ))}
+        )})}
       </div>
 
       <div className="text-center mt-8">
