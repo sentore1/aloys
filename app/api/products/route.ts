@@ -1,7 +1,18 @@
 import { NextRequest, NextResponse } from 'next/server'
-import { supabase } from '../../../lib/supabase'
+import { createClient } from '@supabase/supabase-js'
+
+const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL || ''
+const supabaseKey = process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY || ''
+
+const supabase = supabaseUrl && supabaseKey 
+  ? createClient(supabaseUrl, supabaseKey)
+  : null
 
 export async function GET() {
+  if (!supabase) {
+    return NextResponse.json([])
+  }
+  
   try {
     const { data: products, error } = await supabase
       .from('products')
@@ -21,6 +32,10 @@ export async function GET() {
 }
 
 export async function POST(request: NextRequest) {
+  if (!supabase) {
+    return NextResponse.json({ error: 'Database not configured' }, { status: 500 })
+  }
+  
   try {
     const body = await request.json()
     

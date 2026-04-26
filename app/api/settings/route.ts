@@ -1,7 +1,18 @@
 import { NextResponse } from 'next/server'
-import { supabase } from '../../../lib/supabase'
+import { createClient } from '@supabase/supabase-js'
+
+const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL || ''
+const supabaseKey = process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY || ''
+
+const supabase = supabaseUrl && supabaseKey 
+  ? createClient(supabaseUrl, supabaseKey)
+  : null
 
 export async function GET() {
+  if (!supabase) {
+    return NextResponse.json({})
+  }
+  
   try {
     const { data, error } = await supabase.from('site_settings').select('*').single()
     if (error) throw error

@@ -5,10 +5,14 @@ export async function POST(request: NextRequest) {
   try {
     const body = await request.json()
 
-    const supabase = createClient(
-      process.env.NEXT_PUBLIC_SUPABASE_URL!,
-      process.env.SUPABASE_SERVICE_ROLE_KEY!
-    )
+    const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL || ''
+    const supabaseKey = process.env.SUPABASE_SERVICE_ROLE_KEY || ''
+
+    if (!supabaseUrl || !supabaseKey) {
+      return NextResponse.json({ error: 'Database not configured' }, { status: 500 })
+    }
+
+    const supabase = createClient(supabaseUrl, supabaseKey)
 
     // Get existing settings
     const { data: existing } = await supabase
@@ -27,14 +31,14 @@ export async function POST(request: NextRequest) {
     delete merged.updated_at
 
     // Use PostgreSQL REST API directly
-    const updateUrl = `${process.env.NEXT_PUBLIC_SUPABASE_URL}/rest/v1/site_settings?id=eq.${existing.id}`
+    const updateUrl = `${supabaseUrl}/rest/v1/site_settings?id=eq.${existing.id}`
     
     const response = await fetch(updateUrl, {
       method: 'PATCH',
       headers: {
         'Content-Type': 'application/json',
-        'apikey': process.env.SUPABASE_SERVICE_ROLE_KEY!,
-        'Authorization': `Bearer ${process.env.SUPABASE_SERVICE_ROLE_KEY!}`,
+        'apikey': supabaseKey,
+        'Authorization': `Bearer ${supabaseKey}`,
         'Prefer': 'return=representation'
       },
       body: JSON.stringify(merged)

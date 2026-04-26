@@ -1,9 +1,20 @@
 import { NextRequest, NextResponse } from 'next/server'
-import { supabase } from '../../../lib/supabase'
+import { createClient } from '@supabase/supabase-js'
+
+const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL || ''
+const supabaseKey = process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY || ''
+
+const supabase = supabaseUrl && supabaseKey 
+  ? createClient(supabaseUrl, supabaseKey)
+  : null
 
 export const dynamic = 'force-dynamic'
 
 export async function POST(request: NextRequest) {
+  if (!supabase) {
+    return NextResponse.json({ success: true })
+  }
+  
   try {
     const text = await request.text()
     if (!text) return NextResponse.json({ success: true })
@@ -108,6 +119,10 @@ export async function POST(request: NextRequest) {
 }
 
 export async function GET(request: NextRequest) {
+  if (!supabase) {
+    return NextResponse.json({ error: 'Database not configured' }, { status: 500 })
+  }
+  
   try {
     const { searchParams } = new URL(request.url)
     const days = parseInt(searchParams.get('days') || '7')
