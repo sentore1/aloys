@@ -131,16 +131,18 @@ export default function FooterLocationsManager() {
               </div>
 
               <div className="md:col-span-2">
-                <label className="block text-sm font-medium mb-1">Google Maps Embed URL</label>
-                <input
-                  type="url"
-                  value={location.map_embed || ''}
-                  onChange={(e) => updateLocation(location.id, { map_embed: e.target.value })}
-                  className="w-full p-2 border rounded"
-                  placeholder="https://www.google.com/maps/embed?pb=..."
-                />
+                <label className="block text-sm font-medium mb-1">Show Map</label>
+                <label className="flex items-center gap-2">
+                  <input
+                    type="checkbox"
+                    checked={location.map_embed ? true : false}
+                    onChange={(e) => updateLocation(location.id, { map_embed: e.target.checked ? 'enabled' : '' })}
+                    className="w-4 h-4"
+                  />
+                  <span className="text-sm">Display map for this location (uses address above)</span>
+                </label>
                 <p className="text-xs text-gray-500 mt-1">
-                  Get embed URL: Google Maps → Share → Embed a map → Copy HTML
+                  Map will be automatically generated from the address
                 </p>
               </div>
             </div>

@@ -11,7 +11,7 @@ interface Partnership {
 export default function PartnershipsSection({ 
   partnerships, 
   sectionTitle = "Our Trusted Global Brand Partnership",
-  sectionDescription = "At Infome Technologies, we are proud to collaborate with industry-leading brands and hold certified status across major IT & security platforms."
+  sectionDescription = "At I Tech Devices, we are proud to collaborate with industry-leading brands and hold certified status across major IT & security platforms."
 }: { 
   partnerships: Partnership[], 
   sectionTitle?: string,
@@ -36,7 +36,7 @@ export default function PartnershipsSection({
           >
             {/* Certificate Image */}
             <div className="w-full md:w-1/2">
-              <div className="bg-white border-4 border-blue-200 rounded-lg p-4 shadow-lg">
+              <div className="bg-white rounded-2xl p-4 shadow-2xl">
                 <img 
                   src={partnership.certificate_image} 
                   alt={partnership.title}

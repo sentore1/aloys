@@ -57,7 +57,7 @@ export default function WarrantyPage() {
             </ul>
           </div>
 
-          <div className="border rounded-lg p-6 bg-blue-50">
+          <div className="border rounded-lg p-6 bg-white-50">
             <h2 className="text-2xl font-semibold mb-4">How to Make a Claim</h2>
             <ol className="list-decimal list-inside text-gray-600 space-y-2">
               <li>Contact our support team with your product serial number</li>
@@ -67,8 +67,8 @@ export default function WarrantyPage() {
             </ol>
             <div className="mt-4 pt-4 border-t">
               <p className="font-semibold mb-2">Contact Support:</p>
-              <p className="text-gray-600">Email: warranty@itechdevices.com</p>
-              <p className="text-gray-600">Phone: +1 (555) 123-4567</p>
+              <p className="text-gray-600">Email: info@itechdevices.com</p>
+              <p className="text-gray-600">Phone: +250 782 878 665</p>
             </div>
           </div>
         </div>

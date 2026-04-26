@@ -8,9 +8,18 @@ const iconOptions = ['monitor', 'printer', 'cloud', 'fingerprint', 'card', 'smar
 
 export default function CategoryIconsManager() {
   const [categories, setCategories] = useState<any[]>([])
+  const [productCategories, setProductCategories] = useState<string[]>([])
   const [loading, setLoading] = useState(true)
 
-  useEffect(() => { fetchCategories() }, [])
+  useEffect(() => { 
+    fetchCategories()
+    fetchProductCategories()
+  }, [])
+
+  const fetchProductCategories = async () => {
+    const { data, error } = await supabase.from('categories').select('name').order('name')
+    if (data && !error) setProductCategories(data.map(c => c.name))
+  }
 
   const fetchCategories = async () => {
     const { data, error } = await supabase.from('categories_with_icons').select('*').order('position')
@@ -22,6 +31,8 @@ export default function CategoryIconsManager() {
     const { error } = await supabase.from('categories_with_icons').insert([{
       name: 'New Category',
       icon: 'monitor',
+      link: '',
+      category: '',
       position: categories.length,
       enabled: true
     }])
@@ -65,47 +76,72 @@ export default function CategoryIconsManager() {
 
       <div className="space-y-4">
         {categories.map((cat, index) => (
-          <div key={cat.id} className="border rounded-lg p-4 flex items-center gap-4">
-            <div className="flex gap-2">
-              <button onClick={() => moveCategory(cat.id, 'up')} disabled={index === 0} className="p-1 hover:bg-gray-100 rounded disabled:opacity-30">
-                <ChevronUp className="w-4 h-4" />
-              </button>
-              <button onClick={() => moveCategory(cat.id, 'down')} disabled={index === categories.length - 1} className="p-1 hover:bg-gray-100 rounded disabled:opacity-30">
-                <ChevronDown className="w-4 h-4" />
+          <div key={cat.id} className="border rounded-lg p-4">
+            <div className="flex items-center gap-4">
+              <div className="flex gap-2">
+                <button onClick={() => moveCategory(cat.id, 'up')} disabled={index === 0} className="p-1 hover:bg-gray-100 rounded disabled:opacity-30">
+                  <ChevronUp className="w-4 h-4" />
+                </button>
+                <button onClick={() => moveCategory(cat.id, 'down')} disabled={index === categories.length - 1} className="p-1 hover:bg-gray-100 rounded disabled:opacity-30">
+                  <ChevronDown className="w-4 h-4" />
+                </button>
+              </div>
+
+              <input
+                type="text"
+                value={cat.name}
+                onChange={(e) => updateCategory(cat.id, { name: e.target.value })}
+                className="flex-1 p-2 border rounded"
+                placeholder="Category name"
+              />
+
+              <input
+                type="text"
+                value={cat.link || ''}
+                onChange={(e) => updateCategory(cat.id, { link: e.target.value })}
+                className="flex-1 p-2 border rounded"
+                placeholder="Link (optional, e.g., /products?category=servers)"
+              />
+
+              <select
+                value={cat.icon}
+                onChange={(e) => updateCategory(cat.id, { icon: e.target.value })}
+                className="p-2 border rounded"
+              >
+                {iconOptions.map(icon => (
+                  <option key={icon} value={icon}>{icon}</option>
+                ))}
+              </select>
+
+              <label className="flex items-center gap-2">
+                <input
+                  type="checkbox"
+                  checked={cat.enabled}
+                  onChange={(e) => updateCategory(cat.id, { enabled: e.target.checked })}
+                  className="w-4 h-4"
+                />
+                <span className="text-sm">Enabled</span>
+              </label>
+
+              <button onClick={() => deleteCategory(cat.id)} className="p-2 hover:bg-red-100 text-red-600 rounded">
+                <Trash2 className="w-4 h-4" />
               </button>
             </div>
-
-            <input
-              type="text"
-              value={cat.name}
-              onChange={(e) => updateCategory(cat.id, { name: e.target.value })}
-              className="flex-1 p-2 border rounded"
-              placeholder="Category name"
-            />
-
-            <select
-              value={cat.icon}
-              onChange={(e) => updateCategory(cat.id, { icon: e.target.value })}
-              className="p-2 border rounded"
-            >
-              {iconOptions.map(icon => (
-                <option key={icon} value={icon}>{icon}</option>
-              ))}
-            </select>
-
-            <label className="flex items-center gap-2">
-              <input
-                type="checkbox"
-                checked={cat.enabled}
-                onChange={(e) => updateCategory(cat.id, { enabled: e.target.checked })}
-                className="w-4 h-4"
-              />
-              <span className="text-sm">Enabled</span>
-            </label>
-
-            <button onClick={() => deleteCategory(cat.id)} className="p-2 hover:bg-red-100 text-red-600 rounded">
-              <Trash2 className="w-4 h-4" />
-            </button>
+            
+            <div className="mt-3 pl-12">
+              <label className="block text-sm font-medium text-gray-700 mb-1">Product Category (for filtering)</label>
+              <select
+                value={cat.category || ''}
+                onChange={(e) => updateCategory(cat.id, { category: e.target.value })}
+                className="w-full p-2 border rounded"
+              >
+                <option value="">-- Select Category --</option>
+                {productCategories.map(category => (
+                  <option key={category} value={category}>{category}</option>
+                ))}
+              </select>
+              <p className="text-xs text-gray-500 mt-1">This will filter products by this category when clicked</p>
+            </div>
           </div>
         ))}
       </div>

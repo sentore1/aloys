@@ -52,12 +52,11 @@ export default function Footer() {
   }
 
   return (
-    <footer className={`py-12 ${settings.footer_show_border ? 'border-t' : ''}`}>
+    <footer className={`py-12 ${settings.footer_show_border ? 'border-t border-gray-300' : ''}`}>
       <div className="max-w-7xl mx-auto px-4">
         <div className="grid grid-cols-1 md:grid-cols-4 gap-8 mb-8">
           <div>
             <h3 className="font-bold mb-4">I tech Devices</h3>
-            <p className="text-sm text-gray-600">Leading provider of IT, Security and Identification solutions.</p>
           </div>
           <div>
             <h4 className="font-bold mb-4">Our Products</h4>
@@ -83,7 +82,7 @@ export default function Footer() {
             </ul>
           </div>
         </div>
-        <div className="flex flex-col items-center justify-center text-center border-t pt-6">
+        <div className="flex flex-col items-center justify-center text-center border-t border-gray-300 pt-6">
           {settings.footer_show_logo && settings.site_logo ? (
             <img 
               src={settings.site_logo} 

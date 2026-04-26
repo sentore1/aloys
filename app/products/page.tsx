@@ -1,6 +1,7 @@
 'use client'
 
-import { useState, useEffect } from 'react'
+import { useState, useEffect, Suspense } from 'react'
+import { useSearchParams } from 'next/navigation'
 import { supabase } from '../../lib/supabase'
 import { formatPriceShort } from '../../lib/currency'
 
@@ -23,9 +24,11 @@ interface SiteSettings {
   product_zoom_type: string
 }
 
-export default function ProductsPage() {
+function ProductsContent() {
+  const searchParams = useSearchParams()
+  const categoryParam = searchParams.get('category')
   const [products, setProducts] = useState<Product[]>([])
-  const [selectedCategory, setSelectedCategory] = useState('all')
+  const [selectedCategory, setSelectedCategory] = useState(categoryParam || 'all')
   const [loading, setLoading] = useState(true)
   const [categories, setCategories] = useState<string[]>(['all'])
   const [siteSettings, setSiteSettings] = useState<SiteSettings>({
@@ -35,6 +38,10 @@ export default function ProductsPage() {
     price_badge_color: '#3b82f6',
     product_zoom_type: 'simple'
   })
+
+  useEffect(() => {
+    if (categoryParam) setSelectedCategory(categoryParam)
+  }, [categoryParam])
 
   useEffect(() => {
     fetchProducts()
@@ -195,5 +202,13 @@ export default function ProductsPage() {
         )}
       </div>
     </div>
+  )
+}
+
+export default function ProductsPage() {
+  return (
+    <Suspense fallback={<div className="min-h-screen bg-white flex items-center justify-center"><p className="text-gray-500">Loading...</p></div>}>
+      <ProductsContent />
+    </Suspense>
   )
 }

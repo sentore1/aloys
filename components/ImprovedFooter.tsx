@@ -24,7 +24,14 @@ interface FooterSettings {
   support_links: { label: string, url: string }[]
 }
 
-export default function ImprovedFooter({ settings, siteName }: { settings: FooterSettings, siteName: string }) {
+interface ImprovedFooterProps {
+  settings: FooterSettings
+  siteName: string
+  siteLogo?: string
+  logoSize?: number
+}
+
+export default function ImprovedFooter({ settings, siteName, siteLogo, logoSize = 40 }: ImprovedFooterProps) {
   // Ensure settings has default values
   const safeSettings = {
     company_description: settings?.company_description || 'Leading provider of IT, Security and Identification solutions.',
@@ -79,10 +86,10 @@ export default function ImprovedFooter({ settings, siteName }: { settings: Foote
     <footer style={{ background: `linear-gradient(to bottom right, ${footerColors.bgStart}, ${footerColors.bgEnd})`, color: footerColors.textColor }} className="text-white">
       {/* Locations Section */}
       {enabledLocations.length > 0 && (
-        <div className="border-b border-red-500">
+        <div className="border-b border-gray-300">
           <div className="max-w-7xl mx-auto px-4 py-12">
             <div className={`grid gap-8 ${
-              enabledLocations.length === 1 ? 'grid-cols-1 max-w-md mx-auto' :
+              enabledLocations.length === 1 ? 'grid-cols-1' :
               enabledLocations.length === 2 ? 'grid-cols-1 md:grid-cols-2' :
               'grid-cols-1 md:grid-cols-2 lg:grid-cols-3'
             }`}>
@@ -102,19 +109,25 @@ export default function ImprovedFooter({ settings, siteName }: { settings: Foote
                     </div>
                   </div>
                   {location.map_embed && (
-                    <div className="bg-white rounded overflow-hidden h-32">
+                    <div className="bg-white rounded overflow-hidden h-48">
                       <iframe 
-                        src={location.map_embed}
+                        src={`https://www.google.com/maps/embed/v1/place?key=AIzaSyBFw0Qbyq9zTFTd-tUY6dZWTgaQzuU17R8&q=${encodeURIComponent(location.address)}`}
                         width="100%" 
                         height="100%" 
                         style={{ border: 0 }}
                         loading="lazy"
+                        referrerPolicy="no-referrer-when-downgrade"
                       />
                     </div>
                   )}
-                  <button className="mt-4 bg-white text-red-600 px-4 py-2 rounded font-semibold text-sm hover:bg-gray-100 transition-colors">
+                  <a 
+                    href={`https://www.google.com/maps/search/?api=1&query=${encodeURIComponent(location.address)}`}
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    className="mt-4 inline-block bg-white text-red-600 px-4 py-2 rounded font-semibold text-sm hover:bg-gray-100 transition-colors"
+                  >
                     Get Directions
-                  </button>
+                  </a>
                 </div>
               ))}
             </div>
@@ -127,7 +140,13 @@ export default function ImprovedFooter({ settings, siteName }: { settings: Foote
         <div className="grid grid-cols-1 md:grid-cols-4 gap-8 mb-8">
           {/* Company Info */}
           <div>
-            <h3 className="text-2xl font-bold mb-4">{siteName}</h3>
+            <div className="mb-4">
+              {siteLogo ? (
+                <img src={siteLogo} alt={siteName} style={{ height: `${logoSize}px` }} className="w-auto" />
+              ) : (
+                <span className="text-2xl font-bold tracking-wider">{siteName}</span>
+              )}
+            </div>
             <p className="text-sm mb-4" style={{ opacity: 0.9 }}>
               {safeSettings.company_description}
             </p>
@@ -215,7 +234,7 @@ export default function ImprovedFooter({ settings, siteName }: { settings: Foote
         </div>
 
         {/* Bottom Bar */}
-        <div className="border-t border-red-500 pt-6">
+        <div className="border-t border-gray-300 pt-6">
         </div>
       </div>
     </footer>
@@ -223,9 +242,16 @@ export default function ImprovedFooter({ settings, siteName }: { settings: Foote
     {/* Large Branding Section */}
     <div style={{ backgroundColor: footerColors.brandingBg, color: footerColors.brandingTextColor }} className="py-8">
       <div className="max-w-7xl mx-auto px-4 flex flex-col items-center justify-center text-center">
-        <h2 className="text-5xl md:text-7xl font-bold text-black mb-4">
-          {siteName}<sup style={{ fontSize: '0.5em' }}>™</sup>
-        </h2>
+        {siteLogo ? (
+          <img src={siteLogo} alt={siteName} style={{ height: `${logoSize * 2}px` }} className="w-auto mb-4" />
+        ) : (
+          <h2 className="text-5xl md:text-7xl font-bold text-black mb-4">
+            {siteName}<sup style={{ fontSize: '0.5em' }}>™</sup>
+          </h2>
+        )}
+        <p className="text-sm mb-2" style={{ opacity: 0.8 }}>
+          {safeSettings.company_description}
+        </p>
         <div className="flex flex-col sm:flex-row items-center justify-center gap-2 text-sm" style={{ opacity: 0.8 }}>
           <p>
             © {new Date().getFullYear()} {siteName}<sup style={{ fontSize: '0.5em' }}>™</sup>. All rights reserved.

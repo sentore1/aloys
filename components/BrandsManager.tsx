@@ -1,7 +1,7 @@
 'use client'
 
 import { useState, useEffect } from 'react'
-import { Plus, Trash2, ChevronUp, ChevronDown } from 'lucide-react'
+import { Plus, Trash2, ChevronUp, ChevronDown, Upload } from 'lucide-react'
 import { supabase } from '../lib/supabase'
 
 export default function BrandsManager() {
@@ -23,18 +23,53 @@ export default function BrandsManager() {
       position: brands.length,
       enabled: true
     }])
-    if (!error) fetchBrands()
+    if (error) {
+      console.error('Insert error:', error)
+      alert('Failed to add brand: ' + error.message)
+    } else {
+      fetchBrands()
+    }
   }
 
   const updateBrand = async (id: string, updates: any) => {
     const { error } = await supabase.from('brands').update(updates).eq('id', id)
-    if (!error) fetchBrands()
+    if (error) {
+      console.error('Update error:', error)
+      alert('Failed to update: ' + error.message)
+    } else {
+      fetchBrands()
+    }
   }
 
   const deleteBrand = async (id: string) => {
     if (confirm('Delete this brand?')) {
       const { error } = await supabase.from('brands').delete().eq('id', id)
       if (!error) fetchBrands()
+    }
+  }
+
+  const uploadImage = async (id: string, file: File) => {
+    try {
+      const fileExt = file.name.split('.').pop()
+      const fileName = `brands/${id}-${Date.now()}.${fileExt}`
+      console.log('Uploading to:', fileName)
+      
+      const { data: uploadData, error: uploadError } = await supabase.storage
+        .from('product-images')
+        .upload(fileName, file, { upsert: true })
+      
+      if (uploadError) {
+        console.error('Upload error:', uploadError)
+        alert('Upload failed: ' + uploadError.message)
+        return
+      }
+      
+      const { data } = supabase.storage.from('product-images').getPublicUrl(fileName)
+      console.log('Public URL:', data.publicUrl)
+      await updateBrand(id, { logo: data.publicUrl })
+    } catch (err) {
+      console.error('Upload exception:', err)
+      alert('Upload failed: ' + err)
     }
   }
 
@@ -103,13 +138,25 @@ export default function BrandsManager() {
 
               <div>
                 <label className="block text-sm font-medium mb-1">Logo URL</label>
-                <input
-                  type="url"
-                  value={brand.logo}
-                  onChange={(e) => updateBrand(brand.id, { logo: e.target.value })}
-                  className="w-full p-2 border rounded"
-                  placeholder="https://example.com/logo.png"
-                />
+                <div className="flex gap-2">
+                  <input
+                    type="url"
+                    value={brand.logo}
+                    onChange={(e) => updateBrand(brand.id, { logo: e.target.value })}
+                    className="flex-1 p-2 border rounded"
+                    placeholder="https://example.com/logo.png"
+                  />
+                  <label className="bg-gray-100 hover:bg-gray-200 px-4 py-2 rounded cursor-pointer flex items-center gap-2">
+                    <Upload className="w-4 h-4" />
+                    Upload
+                    <input
+                      type="file"
+                      accept="image/*"
+                      onChange={(e) => e.target.files?.[0] && uploadImage(brand.id, e.target.files[0])}
+                      className="hidden"
+                    />
+                  </label>
+                </div>
               </div>
 
               {brand.logo && (

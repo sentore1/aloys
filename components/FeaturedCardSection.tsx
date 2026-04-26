@@ -53,11 +53,21 @@ export default function FeaturedCardSection({ card }: { card: FeaturedCard }) {
         </div>
         
         <div 
-          className="absolute inset-0 flex items-center justify-center p-8 opacity-0 scale-95 group-hover:opacity-100 group-hover:scale-100 transition-all duration-500"
+          className="absolute inset-0 flex flex-col items-center justify-center p-8 opacity-0 scale-95 group-hover:opacity-100 group-hover:scale-100 transition-all duration-500"
           style={{ backgroundColor: card.background_color }}
         >
           <div className="text-center">
-            <p className="text-white text-lg md:text-xl max-w-2xl leading-relaxed">{card.details}</p>
+            <p className="text-white text-base md:text-lg max-w-2xl leading-relaxed mb-6">{card.details}</p>
+            <a 
+              href={card.button_link} 
+              className="inline-block px-6 py-3 rounded-lg font-medium transition-all duration-300 hover:scale-105"
+              style={{ 
+                backgroundColor: card.text_color, 
+                color: card.background_color 
+              }}
+            >
+              {card.button_text}
+            </a>
           </div>
         </div>
       </div>

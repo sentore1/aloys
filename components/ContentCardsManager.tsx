@@ -320,7 +320,17 @@ export default function ContentCardsManager() {
                         </div>
                       </div>
                     ) : (
-                      <div className="p-2 bg-gray-50 rounded text-sm break-all">{card.image || 'No image'}</div>
+                      <div className="p-2 bg-gray-50 rounded text-sm">
+                        {card.image ? (
+                          card.image.startsWith('data:') ? (
+                            <span className="text-gray-500 italic">Image uploaded (base64)</span>
+                          ) : (
+                            <span className="truncate block">{card.image}</span>
+                          )
+                        ) : (
+                          'No image'
+                        )}
+                      </div>
                     )}
                   </div>
 

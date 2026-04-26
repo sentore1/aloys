@@ -53,7 +53,7 @@ export default function BrandsSection({ brands, title = "Top Brands" }: { brands
       <div className="text-center mb-8">
         <h2 className="text-3xl font-bold mb-4">Our Trusted Global Brand Partnership</h2>
         <p className="text-gray-600 max-w-3xl mx-auto">
-          At Infome Technologies, we are proud to collaborate with industry-leading brands and hold certified status across major IT & security platforms.
+          At I Tech Devices, we are proud to collaborate with industry-leading brands and hold certified status across major IT & security platforms.
         </p>
       </div>
 
