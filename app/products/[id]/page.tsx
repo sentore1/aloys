@@ -410,18 +410,7 @@ export default function ProductDetail() {
               </div>
             </div>
 
-            <div>
-              <h3 className="text-lg font-medium mb-2">Description</h3>
-              <p className="text-gray-600 leading-relaxed">{product.description}</p>
-            </div>
-
-            <div>
-              <p className="text-sm text-gray-500">
-                {product.stock > 0 ? `${product.stock} in stock` : 'Out of stock'}
-              </p>
-            </div>
-
-            {/* Add to Cart and Trust Badges */}
+            {/* Add to Cart and WhatsApp Buttons */}
             <div className="space-y-3">
               <div className="flex gap-3">
                 <button 
@@ -505,6 +494,17 @@ export default function ProductDetail() {
                 <span className="flex items-center gap-1"><Truck className="w-3 h-3" /> Free Ship</span>
                 <span className="flex items-center gap-1"><RotateCcw className="w-3 h-3" /> Returns</span>
               </div>
+            </div>
+
+            <div>
+              <h3 className="text-lg font-medium mb-2">Description</h3>
+              <div className="text-gray-600 leading-relaxed whitespace-pre-line">{product.description}</div>
+            </div>
+
+            <div>
+              <p className="text-sm text-gray-500">
+                {product.stock > 0 ? `${product.stock} in stock` : 'Out of stock'}
+              </p>
             </div>
           </div>
         </div>
