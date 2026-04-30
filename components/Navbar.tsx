@@ -65,6 +65,7 @@ export default function Navbar({
       const organized = parentItems.map((parent: any) => ({
         label: parent.label,
         href: parent.href || undefined,
+        showMegaMenu: parent.show_mega_menu ?? true,
         subItems: (data || [])
           .filter((item: any) => item.parent_id === parent.id)
           .sort((a: any, b: any) => a.position - b.position)

@@ -2,7 +2,7 @@
 
 import { useState, useEffect } from 'react'
 import { useRouter } from 'next/navigation'
-import { Plus, Edit, Trash2, Package, LogOut, Settings, Image, Video, Layout, Grid, Award, Zap } from 'lucide-react'
+import { Plus, Edit, Trash2, Package, LogOut, Settings, Image, Video, Layout, Grid, Award, Zap, Menu } from 'lucide-react'
 import { supabase } from '../../lib/supabase'
 import HeroSectionsManager from '../../components/HeroSectionsManager'
 import CategoryIconsManager from '../../components/CategoryIconsManager'

@@ -5,6 +5,7 @@ import { useParams, useRouter } from 'next/navigation'
 import { ShoppingCart, ChevronLeft, ChevronRight, Maximize2, Minimize2, AlertTriangle, Eye, Clock, Lock, Truck, RotateCcw, X } from 'lucide-react'
 import { generateProductJsonLd } from '../../../lib/seo'
 import { formatPrice, formatPriceShort } from '../../../lib/currency'
+import Footer from '../../../components/Footer'
 
 interface Product {
   id: string
@@ -617,6 +618,7 @@ export default function ProductDetail() {
           )}
         </div>
       )}
+      <Footer />
     </div>
   )
 }

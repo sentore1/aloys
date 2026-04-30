@@ -13,6 +13,7 @@ interface SubMenuItem {
 interface MegaMenuItem {
   label: string
   href?: string
+  showMegaMenu?: boolean
   subItems?: SubMenuItem[]
 }
 
@@ -47,10 +48,10 @@ export default function MegaMenu({ items, textClasses = 'text-gray-700', hoverCl
         <div
           key={item.label}
           className="relative"
-          onMouseEnter={() => item.subItems && handleMouseEnter(item.label)}
+          onMouseEnter={() => item.subItems && item.showMegaMenu !== false && handleMouseEnter(item.label)}
           onMouseLeave={handleMouseLeave}
         >
-          {item.href && !item.subItems ? (
+          {item.href && (!item.subItems || item.showMegaMenu === false) ? (
             <Link
               href={item.href}
               className={`text-sm font-medium transition-colors ${textClasses} ${hoverClasses}`}
@@ -66,11 +67,11 @@ export default function MegaMenu({ items, textClasses = 'text-gray-700', hoverCl
               ) : (
                 item.label
               )}
-              {item.subItems && <ChevronDown className="w-4 h-4" />}
+              {item.subItems && item.showMegaMenu !== false && <ChevronDown className="w-4 h-4" />}
             </button>
           )}
 
-          {item.subItems && activeMenu === item.label && (
+          {item.subItems && item.showMegaMenu !== false && activeMenu === item.label && (
             <div 
               className="absolute top-full left-0 mt-0 bg-white shadow-lg rounded-lg border border-gray-100 min-w-[250px] z-50"
               onMouseEnter={() => handleMouseEnter(item.label)}

@@ -12,6 +12,7 @@ interface MenuItem {
   description?: string
   position: number
   enabled: boolean
+  show_mega_menu: boolean
   children?: MenuItem[]
 }
 
@@ -26,7 +27,8 @@ export default function MegaMenuManager() {
     href: '',
     parent_id: '',
     description: '',
-    enabled: true
+    enabled: true,
+    show_mega_menu: true
   })
 
   useEffect(() => {
@@ -75,6 +77,7 @@ export default function MegaMenuManager() {
             parent_id: formData.parent_id || null,
             description: formData.description,
             enabled: formData.enabled,
+            show_mega_menu: formData.show_mega_menu,
             updated_at: new Date().toISOString()
           })
           .eq('id', editingItem.id)
@@ -102,14 +105,15 @@ export default function MegaMenuManager() {
             parent_id: formData.parent_id || null,
             description: formData.description,
             position: newPosition,
-            enabled: formData.enabled
+            enabled: formData.enabled,
+            show_mega_menu: formData.show_mega_menu
           }])
 
         if (error) throw error
         alert('Menu item added successfully!')
       }
 
-      setFormData({ label: '', href: '', parent_id: '', description: '', enabled: true })
+      setFormData({ label: '', href: '', parent_id: '', description: '', enabled: true, show_mega_menu: true })
       setShowAddForm(false)
       setEditingItem(null)
       fetchMenuItems()
@@ -142,7 +146,8 @@ export default function MegaMenuManager() {
       href: item.href || '',
       parent_id: item.parent_id || '',
       description: item.description || '',
-      enabled: item.enabled
+      enabled: item.enabled,
+      show_mega_menu: item.show_mega_menu ?? true
     })
     setShowAddForm(true)
   }
@@ -243,6 +248,11 @@ export default function MegaMenuManager() {
                   {item.children?.length} items
                 </span>
               )}
+              {!item.parent_id && !item.show_mega_menu && (
+                <span className="text-xs text-gray-600 bg-gray-100 px-2 py-1 rounded">
+                  No dropdown
+                </span>
+              )}
             </div>
             {item.description && (
               <p className="text-sm text-gray-500 mt-1">{item.description}</p>
@@ -309,7 +319,7 @@ export default function MegaMenuManager() {
           onClick={() => {
             setShowAddForm(true)
             setEditingItem(null)
-            setFormData({ label: '', href: '', parent_id: '', description: '', enabled: true })
+            setFormData({ label: '', href: '', parent_id: '', description: '', enabled: true, show_mega_menu: true })
           }}
           className="bg-black text-white px-4 py-2 rounded flex items-center gap-2 hover:bg-gray-800"
         >
@@ -385,7 +395,7 @@ export default function MegaMenuManager() {
                 </p>
               </div>
 
-              <div>
+              <div className="space-y-2">
                 <label className="flex items-center gap-2 cursor-pointer">
                   <input
                     type="checkbox"
@@ -395,6 +405,22 @@ export default function MegaMenuManager() {
                   />
                   <span className="text-sm font-medium">Enabled</span>
                 </label>
+                {!formData.parent_id && (
+                  <label className="flex items-center gap-2 cursor-pointer">
+                    <input
+                      type="checkbox"
+                      checked={formData.show_mega_menu}
+                      onChange={(e) => setFormData({ ...formData, show_mega_menu: e.target.checked })}
+                      className="w-4 h-4"
+                    />
+                    <span className="text-sm font-medium">Show Mega Menu Dropdown</span>
+                  </label>
+                )}
+                {!formData.parent_id && !formData.show_mega_menu && (
+                  <p className="text-xs text-gray-500 ml-6">
+                    This item will be a simple link without dropdown
+                  </p>
+                )}
               </div>
 
               <div className="flex gap-2 pt-4">
