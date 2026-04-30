@@ -4,6 +4,8 @@ import Link from 'next/link'
 import { ShoppingBag, User, Search, Menu, X } from 'lucide-react'
 import { useState, useEffect } from 'react'
 import { usePathname } from 'next/navigation'
+import MegaMenu from './MegaMenu'
+import { supabase } from '../lib/supabase'
 
 interface NavbarProps {
   searchTerm?: string
@@ -32,9 +34,11 @@ export default function Navbar({
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false)
   const pathname = usePathname()
   const isHomePage = pathname === '/'
+  const [menuItems, setMenuItems] = useState<any[]>([])
 
   useEffect(() => {
     updateCartCount()
+    fetchMenuItems()
     
     // Listen for cart updates
     const handleCartUpdate = () => updateCartCount()
@@ -42,6 +46,64 @@ export default function Navbar({
     
     return () => window.removeEventListener('cartUpdated', handleCartUpdate)
   }, [])
+
+  const fetchMenuItems = async () => {
+    try {
+      const { data, error } = await supabase
+        .from('mega_menu')
+        .select('*')
+        .eq('enabled', true)
+        .order('position', { ascending: true })
+
+      if (error) {
+        setMenuItems(getDefaultMenu())
+        return
+      }
+
+      // Organize into parent-child structure
+      const parentItems = (data || []).filter((item: any) => !item.parent_id)
+      const organized = parentItems.map((parent: any) => ({
+        label: parent.label,
+        href: parent.href || undefined,
+        subItems: (data || [])
+          .filter((item: any) => item.parent_id === parent.id)
+          .sort((a: any, b: any) => a.position - b.position)
+          .map((child: any) => ({
+            label: child.label,
+            href: child.href,
+            description: child.description || undefined
+          }))
+      }))
+
+      setMenuItems(organized)
+    } catch (error) {
+      setMenuItems(getDefaultMenu())
+    }
+  }
+
+  const getDefaultMenu = () => [
+    { label: 'Home', href: '/' },
+    {
+      label: 'Products',
+      href: '/products',
+      subItems: [
+        { label: 'All Products', href: '/products', description: 'Browse all items' },
+        { label: 'Laptop', href: '/products?category=laptop', description: 'High-performance laptops' },
+        { label: 'Servers', href: '/servers', description: 'Enterprise servers' },
+        { label: 'Biometric Devices', href: '/biometric-devices', description: 'Security solutions' },
+        { label: 'ID Card Printers', href: '/id-card-printers', description: 'Professional printers' },
+      ]
+    },
+    {
+      label: 'Solutions',
+      href: '/solutions',
+      subItems: [
+        { label: 'All Solutions', href: '/solutions', description: 'View all solutions' },
+      ]
+    },
+    { label: 'Support', href: '/support' },
+    { label: 'Contact', href: '/contact' },
+  ]
 
   const updateCartCount = () => {
     const cartItems = JSON.parse(localStorage.getItem('cart') || '[]')
@@ -90,51 +152,27 @@ export default function Navbar({
             )}
           </Link>
           
-          {/* Show categories only on home page */}
-          {isHomePage && (
-            <div className="hidden md:flex items-center space-x-8">
-              {categories.map(category => (
-                <button
-                  key={category}
-                  onClick={() => onCategoryChange?.(category)}
-                  className={`text-sm font-medium transition-colors ${
-                    selectedCategory === category 
-                      ? getActiveClasses()
-                      : `${getTextClasses()} ${getHoverClasses()}`
-                  }`}
-                >
-                  {category}
-                </button>
-              ))}
-            </div>
-          )}
-
-          {/* Regular navigation for other pages */}
-          {!isHomePage && (
-            <div className="hidden md:flex space-x-8">
-              <Link href="/" className={`${getTextClasses()} ${getHoverClasses()} transition-colors`}>
-                Home
-              </Link>
-              <Link href="/products" className={`${getTextClasses()} ${getHoverClasses()} transition-colors`}>
-                Products
-              </Link>
-            </div>
-          )}
+          {/* Show mega menu on all pages including homepage */}
+          <div className="hidden md:flex">
+            <MegaMenu
+              items={menuItems.length > 0 ? menuItems : getDefaultMenu()}
+              textClasses={getTextClasses()}
+              hoverClasses={getHoverClasses()}
+            />
+          </div>
 
           <div className="flex items-center space-x-4">
-            {/* Search - show only on home page */}
-            {isHomePage && (
-              <div className="hidden md:block relative">
-                <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400 w-4 h-4" />
-                <input
-                  type="text"
-                  placeholder="Search for products..."
-                  value={searchTerm}
-                  onChange={(e) => onSearchChange?.(e.target.value)}
-                  className="pl-10 pr-4 py-2 w-80 border border-gray-200 rounded-full focus:outline-none focus:ring-2 focus:ring-black focus:border-transparent"
-                />
-              </div>
-            )}
+            {/* Search - show on all pages */}
+            <div className="hidden md:block relative">
+              <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400 w-4 h-4" />
+              <input
+                type="text"
+                placeholder="Search for products..."
+                value={searchTerm}
+                onChange={(e) => onSearchChange?.(e.target.value)}
+                className="pl-10 pr-4 py-2 w-80 border border-gray-200 rounded-full focus:outline-none focus:ring-2 focus:ring-black focus:border-transparent"
+              />
+            </div>
             
             <Link href="/login" className={`p-2 rounded-full transition-colors ${headerStyle === 'fashion' ? 'hover:bg-gray-800' : 'hover:bg-gray-50'}`}>
               <User className={`w-5 h-5 ${getTextClasses()}`} />
@@ -164,38 +202,53 @@ export default function Navbar({
         {mobileMenuOpen && (
           <div className="md:hidden border-t border-gray-100 py-4">
             <div className="flex flex-col space-y-4">
-              {isHomePage && (
-                <>
-                  <div className="relative">
-                    <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400 w-4 h-4" />
-                    <input
-                      type="text"
-                      placeholder="Search for products..."
-                      value={searchTerm}
-                      onChange={(e) => onSearchChange?.(e.target.value)}
-                      className="pl-10 pr-4 py-2 w-full border border-gray-200 rounded-full focus:outline-none focus:ring-2 focus:ring-black focus:border-transparent"
-                    />
-                  </div>
-                  <div className="flex flex-wrap gap-2">
-                    {categories.map(category => (
-                      <button
-                        key={category}
-                        onClick={() => {
-                          onCategoryChange?.(category)
-                          setMobileMenuOpen(false)
-                        }}
-                        className={`px-4 py-2 rounded-full text-sm font-medium transition-colors ${
-                          selectedCategory === category 
-                            ? 'bg-black text-white' 
-                            : 'bg-gray-100 text-gray-700 hover:bg-gray-200'
-                        }`}
-                      >
-                        {category}
-                      </button>
-                    ))}
-                  </div>
-                </>
-              )}
+              <div className="relative">
+                <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400 w-4 h-4" />
+                <input
+                  type="text"
+                  placeholder="Search for products..."
+                  value={searchTerm}
+                  onChange={(e) => onSearchChange?.(e.target.value)}
+                  className="pl-10 pr-4 py-2 w-full border border-gray-200 rounded-full focus:outline-none focus:ring-2 focus:ring-black focus:border-transparent"
+                />
+              </div>
+              <div className="flex flex-col space-y-2">
+                <Link
+                  href="/"
+                  onClick={() => setMobileMenuOpen(false)}
+                  className={`px-4 py-2 text-sm font-medium ${getTextClasses()} ${getHoverClasses()}`}
+                >
+                  Home
+                </Link>
+                <Link
+                  href="/products"
+                  onClick={() => setMobileMenuOpen(false)}
+                  className={`px-4 py-2 text-sm font-medium ${getTextClasses()} ${getHoverClasses()}`}
+                >
+                  Products
+                </Link>
+                <Link
+                  href="/solutions"
+                  onClick={() => setMobileMenuOpen(false)}
+                  className={`px-4 py-2 text-sm font-medium ${getTextClasses()} ${getHoverClasses()}`}
+                >
+                  Solutions
+                </Link>
+                <Link
+                  href="/support"
+                  onClick={() => setMobileMenuOpen(false)}
+                  className={`px-4 py-2 text-sm font-medium ${getTextClasses()} ${getHoverClasses()}`}
+                >
+                  Support
+                </Link>
+                <Link
+                  href="/contact"
+                  onClick={() => setMobileMenuOpen(false)}
+                  className={`px-4 py-2 text-sm font-medium ${getTextClasses()} ${getHoverClasses()}`}
+                >
+                  Contact
+                </Link>
+              </div>
             </div>
           </div>
         )}

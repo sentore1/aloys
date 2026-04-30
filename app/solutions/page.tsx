@@ -2,7 +2,6 @@
 
 import { useEffect, useState } from 'react'
 import { supabase } from '../../lib/supabase'
-import Navbar from '../../components/Navbar'
 import ImprovedFooter from '../../components/ImprovedFooter'
 
 export default function SolutionsPage() {
@@ -42,8 +41,6 @@ export default function SolutionsPage() {
 
   return (
     <div className="min-h-screen bg-white">
-      <Navbar searchTerm="" onSearchChange={() => {}} selectedCategory="All" onCategoryChange={() => {}} categories={[]} siteLogo="" siteName="Itech" headerStyle="minimal" logoSize={60} />
-      
       <div className="max-w-7xl mx-auto px-4 py-12">
         <div className="text-center mb-12">
           <div className="inline-block bg-red-500 text-white text-xs font-bold px-4 py-1 rounded-full mb-4">

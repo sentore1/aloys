@@ -23,6 +23,14 @@ interface Product {
   viewers_count?: number
 }
 
+interface ProductSpec {
+  id: string
+  spec_name: string
+  spec_value: string
+  spec_image?: string
+  display_order: number
+}
+
 export default function ProductDetail() {
   const params = useParams()
   const router = useRouter()
@@ -41,11 +49,19 @@ export default function ProductDetail() {
   const [currentViewers, setCurrentViewers] = useState(0)
   const [buttonText, setButtonText] = useState('Cart')
   const [buttonLabel, setButtonLabel] = useState('Add to Cart')
+  const [specs, setSpecs] = useState<ProductSpec[]>([])
+  const [activeTab, setActiveTab] = useState<'description' | 'specs'>('description')
 
   useEffect(() => {
     fetchProduct()
     fetchButtonLabel()
   }, [params.id])
+
+  useEffect(() => {
+    if (product?.id) {
+      fetchSpecs()
+    }
+  }, [product?.id])
 
   useEffect(() => {
     if (product?.sale_end_date) {
@@ -148,6 +164,18 @@ export default function ProductDetail() {
       }
     } catch (error) {
       console.error('Error:', error)
+    }
+  }
+
+  const fetchSpecs = async () => {
+    try {
+      const response = await fetch(`/api/product-specs?productId=${product?.id}`)
+      if (response.ok) {
+        const data = await response.json()
+        setSpecs(data)
+      }
+    } catch (error) {
+      console.error('Error fetching specs:', error)
     }
   }
 
@@ -497,8 +525,54 @@ export default function ProductDetail() {
             </div>
 
             <div>
-              <h3 className="text-lg font-medium mb-2">Description</h3>
-              <div className="text-gray-600 leading-relaxed whitespace-pre-line">{product.description}</div>
+              <div className="flex gap-4 border-b mb-4">
+                <button
+                  onClick={() => setActiveTab('description')}
+                  className={`pb-2 px-4 font-medium transition-colors ${
+                    activeTab === 'description'
+                      ? 'border-b-2 border-black text-black'
+                      : 'text-gray-500 hover:text-gray-700'
+                  }`}
+                >
+                  Description
+                </button>
+                <button
+                  onClick={() => setActiveTab('specs')}
+                  className={`pb-2 px-4 font-medium transition-colors ${
+                    activeTab === 'specs'
+                      ? 'border-b-2 border-black text-black'
+                      : 'text-gray-500 hover:text-gray-700'
+                  }`}
+                >
+                  Specifications {specs.length > 0 && `(${specs.length})`}
+                </button>
+              </div>
+
+              {activeTab === 'description' ? (
+                <div className="text-gray-600 leading-relaxed whitespace-pre-line">{product.description}</div>
+              ) : (
+                <div className="space-y-3">
+                  {specs.length > 0 ? (
+                    specs.map((spec) => (
+                      <div key={spec.id} className="flex gap-4 p-3 bg-gray-50 rounded-lg">
+                        {spec.spec_image && (
+                          <img
+                            src={spec.spec_image}
+                            alt={spec.spec_name}
+                            className="w-16 h-16 object-cover rounded"
+                          />
+                        )}
+                        <div className="flex-1">
+                          <div className="font-medium text-gray-900">{spec.spec_name}</div>
+                          <div className="text-gray-600 text-sm">{spec.spec_value}</div>
+                        </div>
+                      </div>
+                    ))
+                  ) : (
+                    <p className="text-gray-500 text-sm">No specifications available</p>
+                  )}
+                </div>
+              )}
             </div>
 
             <div>

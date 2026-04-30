@@ -249,9 +249,6 @@ export default function ImprovedFooter({ settings, siteName, siteLogo, logoSize 
             {siteName}<sup style={{ fontSize: '0.5em' }}>™</sup>
           </h2>
         )}
-        <p className="text-sm mb-2" style={{ opacity: 0.8 }}>
-          {safeSettings.company_description}
-        </p>
         <div className="flex flex-col sm:flex-row items-center justify-center gap-2 text-sm" style={{ opacity: 0.8 }}>
           <p>
             © {new Date().getFullYear()} {siteName}<sup style={{ fontSize: '0.5em' }}>™</sup>. All rights reserved.

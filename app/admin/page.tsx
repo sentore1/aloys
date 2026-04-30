@@ -16,6 +16,8 @@ import ContentCardsManager from '../../components/ContentCardsManager'
 import FeaturedCardsManager from '../../components/FeaturedCardsManager'
 import AnalyticsPanel from '../../components/AnalyticsPanel'
 import OrdersPanel from '../../components/OrdersPanel'
+import ProductSpecsManager from '../../components/ProductSpecsManager'
+import MegaMenuManager from '../../components/MegaMenuManager'
 
 interface Product {
   id: string
@@ -531,6 +533,7 @@ export default function AdminDashboard() {
             { id: 'orders', label: 'Orders', icon: Package },
             { id: 'analytics', label: 'Analytics', icon: Settings },
             { id: 'categories', label: 'Categories', icon: Layout },
+            { id: 'mega-menu', label: 'Navigation Menu', icon: Menu },
             { id: 'seo', label: 'SEO', icon: Settings },
             { id: 'site', label: 'Site Settings', icon: Settings },
             { id: 'hero-sections', label: 'Hero Sections', icon: Image },
@@ -558,6 +561,9 @@ export default function AdminDashboard() {
             </button>
           ))}
         </div>
+
+        {/* Mega Menu Manager Tab */}
+        {activeTab === 'mega-menu' && <MegaMenuManager />}
 
         {/* Analytics Tab */}
         {activeTab === 'analytics' && <AnalyticsPanel />}
@@ -1630,6 +1636,12 @@ export default function AdminDashboard() {
                   </div>
                 </div>
               </div>
+
+              {editingProduct && (
+                <div className="border-t pt-4">
+                  <ProductSpecsManager productId={editingProduct.id} />
+                </div>
+              )}
               
               <div>
                 <div className="flex justify-between items-center mb-3">

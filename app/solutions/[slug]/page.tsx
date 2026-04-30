@@ -3,7 +3,6 @@
 import { useEffect, useState } from 'react'
 import { useParams } from 'next/navigation'
 import { supabase } from '../../../lib/supabase'
-import Navbar from '../../../components/Navbar'
 import ImprovedFooter from '../../../components/ImprovedFooter'
 
 export default function SolutionPage() {
@@ -54,7 +53,6 @@ export default function SolutionPage() {
   if (!solution) {
     return (
       <div className="min-h-screen bg-white">
-        <Navbar searchTerm="" onSearchChange={() => {}} selectedCategory="All" onCategoryChange={() => {}} categories={[]} siteLogo="" siteName="Itech" headerStyle="minimal" logoSize={60} />
         <div className="max-w-4xl mx-auto px-4 py-20 text-center">
           <h1 className="text-4xl font-bold mb-4">Solution Not Found</h1>
           <p className="text-gray-600 mb-8">The solution you're looking for doesn't exist.</p>
@@ -71,8 +69,6 @@ export default function SolutionPage() {
 
   return (
     <div className="min-h-screen bg-white">
-      <Navbar searchTerm="" onSearchChange={() => {}} selectedCategory="All" onCategoryChange={() => {}} categories={[]} siteLogo="" siteName="Itech" headerStyle="minimal" logoSize={60} />
-      
       <div className="max-w-6xl mx-auto px-4 py-12">
         <div className="mb-8">
           <a href="/" className="text-red-500 hover:text-red-600 font-medium">← Back to Home</a>
