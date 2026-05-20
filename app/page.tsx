@@ -12,6 +12,7 @@ import SolutionsSection from '../components/SolutionsSection'
 import ContentCardsSection from '../components/ContentCardsSection'
 import FeaturedCardSection from '../components/FeaturedCardSection'
 import ImprovedFooter from '../components/ImprovedFooter'
+import MaintenanceMode from '../components/MaintenanceMode'
 import { supabase } from '../lib/supabase'
 import { formatPrice, formatPriceShort } from '../lib/currency'
 
@@ -58,6 +59,11 @@ interface SiteSettings {
   hero_title_size: number
   product_zoom_type: 'simple' | 'detailed'
   homepage_product_limit: number
+  maintenance_mode: boolean
+  maintenance_title: string
+  maintenance_message: string
+  maintenance_background_color: string
+  maintenance_text_color: string
 }
 
 function parseGalleryImages(raw: any): string[] {
@@ -177,7 +183,12 @@ export default function Home() {
     hero_title_font: 'inherit',
     hero_title_size: 48,
     product_zoom_type: 'simple',
-    homepage_product_limit: 24
+    homepage_product_limit: 24,
+    maintenance_mode: false,
+    maintenance_title: 'We\'ll be back soon!',
+    maintenance_message: 'Our site is currently undergoing scheduled maintenance. We\'ll be back shortly. Thank you for your patience.',
+    maintenance_background_color: '#ffffff',
+    maintenance_text_color: '#000000'
   })
 
   const [cartCount, setCartCount] = useState(0)
@@ -366,6 +377,18 @@ export default function Home() {
   const limit = siteSettings.homepage_product_limit || 16
   const displayedProducts = filteredProducts.slice(0, limit)
   const hasMore = filteredProducts.length > limit
+
+  // Show maintenance mode if enabled
+  if (siteSettings.maintenance_mode) {
+    return (
+      <MaintenanceMode
+        title={siteSettings.maintenance_title}
+        message={siteSettings.maintenance_message}
+        backgroundColor={siteSettings.maintenance_background_color}
+        textColor={siteSettings.maintenance_text_color}
+      />
+    )
+  }
 
   return (
     <div className="min-h-screen bg-white">

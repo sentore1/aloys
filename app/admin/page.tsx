@@ -89,6 +89,11 @@ interface SiteSettings {
   footer_branding_bg_color: string
   footer_text_color: string
   footer_branding_text_color: string
+  maintenance_mode: boolean
+  maintenance_title: string
+  maintenance_message: string
+  maintenance_background_color: string
+  maintenance_text_color: string
 }
 
 export default function AdminDashboard() {
@@ -147,6 +152,11 @@ export default function AdminDashboard() {
     footer_branding_bg_color: '#ffffff',
     footer_text_color: '#ffffff',
     footer_branding_text_color: '#000000',
+    maintenance_mode: false,
+    maintenance_title: 'We\'ll be back soon!',
+    maintenance_message: 'Our site is currently undergoing scheduled maintenance. We\'ll be back shortly. Thank you for your patience.',
+    maintenance_background_color: '#ffffff',
+    maintenance_text_color: '#000000',
   })
   const [formData, setFormData] = useState({
     name: '',
@@ -328,6 +338,11 @@ export default function AdminDashboard() {
           footer_branding_bg_color: siteSettings.footer_branding_bg_color,
           footer_text_color: siteSettings.footer_text_color,
           footer_branding_text_color: siteSettings.footer_branding_text_color,
+          maintenance_mode: siteSettings.maintenance_mode,
+          maintenance_title: siteSettings.maintenance_title,
+          maintenance_message: siteSettings.maintenance_message,
+          maintenance_background_color: siteSettings.maintenance_background_color,
+          maintenance_text_color: siteSettings.maintenance_text_color,
         }
 
         // Store MoMo settings and logo in site_logo as JSON (workaround for missing columns)
@@ -899,6 +914,67 @@ export default function AdminDashboard() {
                           rows={3}
                           placeholder="Instructions shown to customer after selecting MoMo"
                         />
+                      </div>
+                    </div>
+                  )}
+                </div>
+              </div>
+
+              <div className="border-t pt-6">
+                <h3 className="text-base font-medium mb-4">Maintenance Mode</h3>
+                <div className="space-y-4">
+                  <label className="flex items-center gap-3 cursor-pointer">
+                    <input 
+                      type="checkbox" 
+                      checked={!!siteSettings.maintenance_mode} 
+                      onChange={(e) => setSiteSettings({...siteSettings, maintenance_mode: e.target.checked})} 
+                      className="w-4 h-4" 
+                    />
+                    <span className="font-medium">Enable Maintenance Mode</span>
+                  </label>
+                  <p className="text-sm text-gray-500">When enabled, visitors will see a maintenance page instead of your site.</p>
+
+                  {siteSettings.maintenance_mode && (
+                    <div className="ml-7 space-y-4 border-l-2 border-gray-200 pl-4">
+                      <div>
+                        <label className="block text-sm font-medium mb-2">Maintenance Title</label>
+                        <input
+                          type="text"
+                          value={siteSettings.maintenance_title || ''}
+                          onChange={(e) => setSiteSettings({...siteSettings, maintenance_title: e.target.value})}
+                          className="w-full p-3 border border-gray-300 rounded focus:outline-none focus:border-black"
+                          placeholder="We'll be back soon!"
+                        />
+                      </div>
+                      <div>
+                        <label className="block text-sm font-medium mb-2">Maintenance Message</label>
+                        <textarea
+                          value={siteSettings.maintenance_message || ''}
+                          onChange={(e) => setSiteSettings({...siteSettings, maintenance_message: e.target.value})}
+                          className="w-full p-3 border border-gray-300 rounded focus:outline-none focus:border-black"
+                          rows={4}
+                          placeholder="Our site is currently undergoing scheduled maintenance..."
+                        />
+                      </div>
+                      <div className="grid grid-cols-2 gap-4">
+                        <div>
+                          <label className="block text-sm font-medium mb-2">Background Color</label>
+                          <input
+                            type="color"
+                            value={siteSettings.maintenance_background_color || '#ffffff'}
+                            onChange={(e) => setSiteSettings({...siteSettings, maintenance_background_color: e.target.value})}
+                            className="w-full p-2 border border-gray-300 rounded focus:outline-none focus:border-black h-12"
+                          />
+                        </div>
+                        <div>
+                          <label className="block text-sm font-medium mb-2">Text Color</label>
+                          <input
+                            type="color"
+                            value={siteSettings.maintenance_text_color || '#000000'}
+                            onChange={(e) => setSiteSettings({...siteSettings, maintenance_text_color: e.target.value})}
+                            className="w-full p-2 border border-gray-300 rounded focus:outline-none focus:border-black h-12"
+                          />
+                        </div>
                       </div>
                     </div>
                   )}
